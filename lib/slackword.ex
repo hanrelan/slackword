@@ -1,0 +1,2 @@
+defmodule Slackword do
+end
