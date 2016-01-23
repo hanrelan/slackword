@@ -1,4 +1,5 @@
 defmodule Slackword.Downloader do
+  @static_dir "privstatic"
   use Timex
 
   def get(%DateTime{} = date) do
@@ -13,11 +14,11 @@ defmodule Slackword.Downloader do
   defp get_url(filename) do
     url = "http://cdn.games.arkadiumhosted.com/latimes/assets/DailyCrossword/#{filename}"
     response = HTTPotion.get url
-    :ok = File.write "crosswords/#{filename}", response.body
+    :ok = File.write "#{@static_dir}/#{filename}", response.body
     response.body
   end
 
   defp get_file(filename) do
-    File.read "crosswords/#{filename}"
+    File.read "#{@static_dir}/#{filename}"
   end
 end

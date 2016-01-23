@@ -1,10 +1,10 @@
 defmodule Slackword.Crossword.Cell do
-  defstruct type: :block, number: "", solution: "", answer: ""
+  defstruct type: :block, number: "", solution: "", answer: "", x: 0, y: 0
 
   alias Slackword.Crossword.Cell
 
-  def new(%{type: "block"}) do
-    %Cell{}
+  def new(%{type: "block", x: x, y: y}) do
+    %Cell{x: x, y: y}
   end
 
   def new(cell_map) do
@@ -12,36 +12,24 @@ defmodule Slackword.Crossword.Cell do
     %{cell | type: :normal}
   end
 
-  def block?(%Cell{type: :block}) do
-    true
+  def block?(%Cell{type: :block}), do: true
+  def block?(%Cell{type: _}), do: false
+
+  def render_to_image(%Cell{} = cell, image, box_width, block_color) do
+    {top_left, bottom_right} = corners(cell, box_width)
+    unless block?(cell) do
+      :egd.rectangle(image, top_left, bottom_right, block_color)
+    else
+      :egd.filledRectangle(image, top_left, bottom_right, block_color)
+    end
+    image
   end
 
-  def block?(%Cell{type: _}) do
-    false
+  defp corners(%Cell{x: x, y: y}, box_width) do
+    top_left_x = (x - 1) * box_width
+    top_left_y = (y - 1) * box_width
+    {{top_left_x, top_left_y}, {top_left_x + box_width, top_left_y + box_width}}
   end
-end
-
-defmodule Slackword.Crossword.Grid do
-  defstruct cells: %HashDict{}, width: 0, height: 0
-
-  alias Slackword.Crossword.Cell
-
-  def new(dimensions, cell_list) do
-    grid = Map.merge(%Slackword.Crossword.Grid{}, dimensions)
-    cells = Enum.reduce(cell_list, HashDict.new, &add_cell/2)
-    %{grid | cells: cells}
-  end
-
-  def get(%Slackword.Crossword.Grid{cells: cells}, x, y) do
-    HashDict.fetch!(cells, x) |> HashDict.fetch!(y) 
-  end
-
-  defp add_cell(%{x: x, y: y} = cell_map, cells) do
-    cell = Cell.new(cell_map)
-    new_x = HashDict.get(cells, x, HashDict.new) |> HashDict.put(y, cell)
-    HashDict.put(cells, x, new_x)
-  end
-
 end
 
 defmodule Slackword.Crossword.Metadata do
@@ -56,17 +44,17 @@ defmodule Slack.Crossword.Clue do
   defstruct word: nil, number: nil, format: nil
 end
 
-
 defmodule Slackword.Crossword do
-  alias Slackword.Crossword.{Grid, Metadata, Cell}
+  alias Slackword.{Crossword, Grid}
+  alias Slackword.Crossword.{Metadata, Cell}
 
-  defstruct metadata: %Metadata{}, grid: %Grid{}, words: %HashDict{}, clues_across: [], clues_down: []
+  defstruct metadata: %Metadata{}, grid: %Grid{}, words: %{}, clues_across: [], clues_down: []
 
   def new(%Timex.DateTime{} = date) do
     Slackword.Downloader.get(date) |> Slackword.Parser.parse
   end
 
-  def get(%Slackword.Crossword{grid: grid}, x, y) do
+  def get(%Crossword{grid: grid}, x, y) do
     Grid.get(grid, x, y)
   end
 
@@ -74,30 +62,19 @@ defmodule Slackword.Crossword do
     Cell.block?(cell)
   end
 
-end
-
-defmodule Slackword.Parser do
-  alias Slackword.Crossword
-  alias Slackword.Crossword.{Grid, Metadata}
-  import SweetXml
-
-  def parse(xml) do
-    crossword = %Crossword{}
-    parse_metadata(crossword, xml) |> parse_grid(xml)
-  end
-
-  defp parse_metadata(crossword, xml) do
-    metadata = xml |> xpath(~x"//metadata", title: ~x"./title/text()"so, creator: ~x"./creator/text()"so, 
-                                            copyright: ~x"./copyright/text()"so, description: ~x"./description/text()"so)
-    %{crossword | metadata: Metadata.new(metadata)}
-  end
-
-  defp parse_grid(crossword, xml) do
-    dimensions = xml |> xpath(~x"//grid", width: ~x"./@width"i, height: ~x"./@height"i)
-    cells = xml |> xpath(~x"//grid/cell"l, x: ~x"./@x"i, y: ~x"./@y"i, 
-                                            solution: ~x"./@solution"so, number: ~x"./@number"so,
-                                            type: ~x"./@type"so)
-    %{crossword | grid: Grid.new(dimensions, cells)}
+  def render(%Crossword{grid: grid}, output_width \\ 500, output_height \\ 400) do
+    image = :egd.create(output_width, output_height)
+    block_color = :egd.color(:black)
+    box_width = 
+      if Float.floor(output_width/grid.width) <= Float.floor(output_height/grid.height) do
+        Float.floor(output_width/grid.width) |> round
+      else
+        Float.floor(output_height/grid.height) |> round
+      end
+    Grid.reduce(grid, image, fn({_x, _y, cell = %Cell{}}, image) ->
+      Cell.render_to_image(cell, image, box_width, block_color)
+    end)
+    image
   end
 
 end
