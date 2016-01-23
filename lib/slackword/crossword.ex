@@ -1,6 +1,9 @@
 defmodule Slackword.Crossword.Cell do
   defstruct type: :block, number: "", solution: "", answer: "", x: 0, y: 0
 
+  @block_color :egd.color(:black)
+  @number_color :egd.color(:gray)
+
   alias Slackword.Crossword.Cell
 
   def new(%{type: "block", x: x, y: y}) do
@@ -15,12 +18,20 @@ defmodule Slackword.Crossword.Cell do
   def block?(%Cell{type: :block}), do: true
   def block?(%Cell{type: _}), do: false
 
-  def render_to_image(%Cell{} = cell, image, box_width, block_color) do
+  def render_to_image(%Cell{} = cell, image, %{box_width: box_width} = settings) do
     {top_left, bottom_right} = corners(cell, box_width)
     unless block?(cell) do
-      :egd.rectangle(image, top_left, bottom_right, block_color)
+      :egd.rectangle(image, top_left, bottom_right, @block_color)
+      {top_left_x, top_left_y} = top_left
+      unless String.length(cell.number) == 0 do
+        :egd.text(image, {top_left_x + 2, top_left_y}, settings.number_font, String.to_char_list("#{cell.number}"), @number_color)
+      end
+      {letter_w, letter_h} = :egd_font.size(settings.letter_font)
+      topl_x = round((box_width - letter_w)/2) + top_left_x
+      topl_y = round((box_width - letter_h)/2) + top_left_y + 3
+      :egd.text(image, {topl_x, topl_y}, settings.letter_font, String.to_char_list(cell.solution), @block_color)
     else
-      :egd.filledRectangle(image, top_left, bottom_right, block_color)
+      :egd.filledRectangle(image, top_left, bottom_right, @block_color)
     end
     image
   end
@@ -62,9 +73,10 @@ defmodule Slackword.Crossword do
     Cell.block?(cell)
   end
 
-  def render(%Crossword{grid: grid}, output_width \\ 500, output_height \\ 400) do
+  def render(%Crossword{grid: grid}, output_width \\ 400, output_height \\ 500) do
     image = :egd.create(output_width, output_height)
-    block_color = :egd.color(:black)
+    number_font = :egd_font.load(Path.join([:code.priv_dir(:percept), "fonts", "6x11_latin1.wingsfont"]))
+    letter_font = :egd_font.load(Path.join(["privstatic", "fonts", "osx", "Terminus16.wingsfont"]))
     box_width = 
       if Float.floor(output_width/grid.width) <= Float.floor(output_height/grid.height) do
         Float.floor(output_width/grid.width) |> round
@@ -72,7 +84,7 @@ defmodule Slackword.Crossword do
         Float.floor(output_height/grid.height) |> round
       end
     Grid.reduce(grid, image, fn({_x, _y, cell = %Cell{}}, image) ->
-      Cell.render_to_image(cell, image, box_width, block_color)
+      Cell.render_to_image(cell, image, %{box_width: box_width, number_font: number_font, letter_font: letter_font})
     end)
     image
   end

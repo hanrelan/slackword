@@ -10,6 +10,7 @@ defmodule Slackword.CrosswordTest do
   test "render", %{crossword: crossword} do
     image = Crossword.render(crossword)
     png = :egd.render(image, :png)
+    :egd.save(png, "test1.png")
     assert png == TestHelper.test_crossword_png
   end
 end
