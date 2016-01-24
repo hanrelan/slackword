@@ -14,12 +14,10 @@ defmodule Slackword.Crossword.ParserTest do
   end
 
   test "grid", %{crossword: crossword} do
-    assert crossword.grid.width == 3
-    assert crossword.grid.height == 3
+    assert crossword.grid.dimensions == {3, 3}
     top_left = Crossword.get(crossword, 1, 1)
     assert top_left.number == "1"
     assert top_left.solution == "C"
-    assert top_left.answer == ""
     assert top_left.x == 1
     assert top_left.y == 1
     assert Crossword.block?(top_left) == false
@@ -30,8 +28,7 @@ defmodule Slackword.Crossword.ParserTest do
     bottom_right = Crossword.get(crossword, 3, 3)
     assert bottom_right.number == ""
     assert bottom_right.solution == "O"
-    assert bottom_right.answer == ""
     assert Crossword.block?(bottom_right) == false
   end
-
+  
 end

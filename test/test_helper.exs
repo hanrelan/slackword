@@ -15,4 +15,9 @@ defmodule TestHelper do
     {:ok, file} = File.read "#{@static_dir}/test_crossword.png"
     file
   end
+
+  def test_crossword_answers_png do
+    {:ok, file} = File.read "#{@static_dir}/test_crossword_answers.png"
+    file
+  end
 end
