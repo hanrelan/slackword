@@ -3,8 +3,10 @@ defmodule Slackword.Crossword.Cell do
 
   @block_color :egd.color(:black)
   @number_color :egd.color(:gray)
+  @letter_color :egd.color(:blue)
 
   alias Slackword.Crossword.Cell
+  alias Slackword.GridSquare
 
   def new(%{type: "block", x: x, y: y}) do
     %Cell{x: x, y: y}
@@ -19,7 +21,7 @@ defmodule Slackword.Crossword.Cell do
   def block?(%Cell{type: _}), do: false
 
   def render_to_image(%Cell{} = cell, image, settings) do
-    {top_left, bottom_right} = corners(cell, settings.box_width)
+    {top_left, bottom_right} = GridSquare.corners({cell.x, cell.y}, settings.box_width)
     unless block?(cell) do
       :egd.rectangle(image, top_left, bottom_right, @block_color)
       {top_left_x, top_left_y} = top_left
@@ -32,11 +34,10 @@ defmodule Slackword.Crossword.Cell do
     image
   end
 
-  defp corners(%Cell{x: x, y: y}, box_width) do
-    top_left_x = (x - 1) * box_width
-    top_left_y = (y - 1) * box_width
-    {{top_left_x, top_left_y}, {top_left_x + box_width, top_left_y + box_width}}
+  def render_solution(%Cell{} = cell, image, %{box_width: box_width, letter_font: letter_font}) do
+    GridSquare.render_letter_to_image(image, {cell.x, cell.y}, cell.solution, box_width, %{letter_font: letter_font, letter_color: @letter_color})
   end
+
 end
 
 defmodule Slackword.Crossword.Metadata do

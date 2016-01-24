@@ -22,9 +22,41 @@ defmodule Slackword.ActiveCrosswordTest do
   test "rendering with answers", %{active_crossword: active_crossword} do
     active_crossword = ActiveCrossword.add_answer(active_crossword, %Answer{letter: "A", x: 1, y: 2})
     active_crossword = ActiveCrossword.add_answer(active_crossword, %Answer{letter: "O", x: 3, y: 3})
-    png = ActiveCrossword.render_png(active_crossword)
+    png = ActiveCrossword.render(active_crossword)
     :egd.save(png, "test2.png")
     assert png == TestHelper.test_crossword_answers_png
+  end
+
+  test "rendering errors without solutions", %{active_crossword: active_crossword} do
+    active_crossword = ActiveCrossword.add_answer(active_crossword, %Answer{letter: "B", x: 1, y: 2})
+    active_crossword = ActiveCrossword.add_answer(active_crossword, %Answer{letter: "O", x: 3, y: 3})
+    png = ActiveCrossword.render_errors(active_crossword)
+    :egd.save(png, "test3.png")
+    assert png == TestHelper.test_crossword_errors_png
+  end
+
+  test "rendering errors with solutions", %{active_crossword: active_crossword} do
+    active_crossword = ActiveCrossword.add_answer(active_crossword, %Answer{letter: "B", x: 1, y: 2})
+    active_crossword = ActiveCrossword.add_answer(active_crossword, %Answer{letter: "O", x: 3, y: 3})
+    png = ActiveCrossword.render_errors(active_crossword, true)
+    :egd.save(png, "test4.png")
+    assert png == TestHelper.test_crossword_solution_png
+  end
+
+  test "checking if solved", %{active_crossword: active_crossword} do
+    answers = [
+      {"C", 1, 1}, {"A", 1, 2}, {"P", 1, 3},
+      {"A", 2, 1}, {"N", 2, 2}, {"T", 2, 3},
+      {"T", 3, 1}
+    ]
+    active_crossword = Enum.reduce(answers, active_crossword, fn({letter, x, y}, a_c) ->
+      ActiveCrossword.add_answer(a_c, %Answer{letter: letter, x: x, y: y})
+    end)
+    assert not ActiveCrossword.solved?(active_crossword)
+    active_crossword = ActiveCrossword.add_answer(active_crossword, %Answer{letter: "O", x: 3, y: 3})
+    png = ActiveCrossword.render_errors(active_crossword)
+    :egd.save(png, "test5.png")
+    assert ActiveCrossword.solved?(active_crossword)
   end
 
 end

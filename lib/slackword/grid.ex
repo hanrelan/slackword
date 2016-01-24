@@ -1,3 +1,21 @@
+defmodule Slackword.GridSquare do
+
+  def corners({x, y}, box_width) do
+    top_left_x = (y - 1) * box_width
+    top_left_y = (x - 1) * box_width
+    {{top_left_x, top_left_y}, {top_left_x + box_width, top_left_y + box_width}}
+  end
+
+  def render_letter_to_image(image, point, letter, box_width, %{letter_font: letter_font, letter_color: letter_color}) do
+    {letter_w, letter_h} = :egd_font.size(letter_font)
+    {{top_left_x, top_left_y}, _} = corners(point, box_width)
+    top_left_x = round((box_width - letter_w)/2) + top_left_x
+    top_left_y = round((box_width - letter_h)/2) + top_left_y + 3
+    :egd.text(image, {top_left_x, top_left_y}, letter_font, String.to_char_list(letter), letter_color)
+    image
+  end
+end
+
 defmodule Slackword.Grid do
   defstruct cells: %{}, dimensions: {0, 0}
 
@@ -9,7 +27,7 @@ defmodule Slackword.Grid do
   end
 
   def get(%Grid{cells: cells}, x, y) do
-    Map.fetch!(cells, x) |> Map.fetch!(y) 
+    Map.get(cells, x, %{}) |> Map.get(y) 
   end
 
   def add(%Grid{cells: cells} = grid, x, y, cell) do
@@ -36,6 +54,5 @@ defmodule Slackword.Grid do
     new_x = Map.get(cells, x, %{}) |> Map.put(y, cell)
     Map.put(cells, x, new_x)
   end
-
 
 end
