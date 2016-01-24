@@ -54,8 +54,6 @@ defmodule Slackword.ActiveCrosswordTest do
     end)
     assert not ActiveCrossword.solved?(active_crossword)
     active_crossword = ActiveCrossword.add_answer(active_crossword, %Answer{letter: "O", x: 3, y: 3})
-    png = ActiveCrossword.render_errors(active_crossword)
-    :egd.save(png, "test5.png")
     assert ActiveCrossword.solved?(active_crossword)
   end
 
