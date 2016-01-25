@@ -66,10 +66,12 @@ defmodule Slackword.ActiveCrossword do
     :egd.render(base_image, :png)
   end
 
-  def solved?(%ActiveCrossword{crossword: crossword, answers: answers} = active_crossword) do
+  def solved?(%ActiveCrossword{crossword: crossword} = active_crossword) do
     any_errors = false
     any_errors = Grid.reduce(crossword.grid, any_errors, fn({_x, _y, cell=%Cell{x: x, y: y, solution: solution}}, any_errors) ->
-      %Answer{letter: letter} = answer = ActiveCrossword.get_answer(active_crossword, x, y)
+      # TODO(rohan): Seems inefficient to destructure active_crossword every time
+      # Convert this to use Answer.get_answers instead
+      %Answer{letter: letter} = ActiveCrossword.get_answer(active_crossword, x, y)
       cond do
         Crossword.block?(cell) -> any_errors
         letter != solution -> 

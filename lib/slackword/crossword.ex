@@ -48,15 +48,51 @@ defmodule Slackword.Crossword.Metadata do
   end
 end
 
-defmodule Slack.Crossword.Clue do
-  defstruct word: nil, number: nil, format: nil
+defmodule Slackword.Crossword.Word do
+  defstruct id: "", x_range: {0, 0}, y_range: {0, 0}, direction: :across
+
+  alias Slackword.Crossword.Word
+
+  def new(%{id: id, x_range: x_range, y_range: y_range}) do
+    word = %Word{id: id, x_range: parse_range(x_range), y_range: parse_range(y_range)}
+    direction = case word do
+      %Word{y_range: {y, y}} -> :across
+      _else -> :down
+    end
+    %{word | direction: direction}
+  end
+
+  defp parse_range(range) do
+    case String.split(range, "-") do
+      [num_str] -> 
+        {number, _rem} = Integer.parse(num_str)
+        {number, number}
+      [start_num_str, end_num_str] ->
+        {start_num, _rem} = Integer.parse(start_num_str)
+        {end_num, _rem} = Integer.parse(end_num_str)
+        {start_num, end_num}
+    end
+  end
+
+end
+
+defmodule Slackword.Crossword.Clue do
+  alias Slackword.Crossword.{Clue, Word}
+  defstruct word: %Word{}, text: "", number: "", format: "", direction: :across
+
+
+  def new(%{format: format, number: number, word_id: word_id, text: text}, word_map) do
+    %Word{direction: direction} = word = Map.fetch!(word_map, word_id)
+    %Clue{format: format, number: number, word: word, direction: direction, text: text} 
+  end
+
 end
 
 defmodule Slackword.Crossword do
   alias Slackword.{Crossword, Grid}
-  alias Slackword.Crossword.{Metadata, Cell}
+  alias Slackword.Crossword.{Metadata, Cell, Clue}
 
-  defstruct metadata: %Metadata{}, grid: %Grid{}, words: %{}, clues_across: [], clues_down: []
+  defstruct metadata: %Metadata{}, grid: %Grid{}, clues: %{}, clues_across: [], clues_down: []
 
   def new(%Timex.DateTime{} = date) do
     Slackword.Downloader.get(date) |> Slackword.Parser.parse
@@ -68,6 +104,19 @@ defmodule Slackword.Crossword do
 
   def block?(%Cell{} = cell) do
     Cell.block?(cell)
+  end
+
+  def set_clues(%Crossword{} = crossword, clues) do
+    {clues_across, clues_down} = Enum.partition(clues, fn(clue) -> clue.direction == :across end)
+    clues = Enum.into(clues, %{}, fn(clue) -> {{clue.number, clue.direction}, clue} end)
+    %{crossword | clues_across: clues_across, clues_down: clues_down, clues: clues}
+  end
+
+  def get_word(%Crossword{clues: clues}, {_number, _direction} = clue_idx) do
+    case Map.get(clues, clue_idx) do
+      nil -> nil
+      %Clue{word: word} -> word
+    end
   end
 
   def render(%Crossword{grid: grid}, output_width \\ 400, output_height \\ 500) do
