@@ -14,7 +14,7 @@ end
 defmodule Slackword.ActiveCrossword do
   alias Slackword.{Crossword, Grid, ActiveCrossword}
   alias Slackword.ActiveCrossword.Answer
-  alias Slackword.Crossword.Cell
+  alias Slackword.Crossword.{Cell, Word}
 
   defstruct crossword: %Crossword{}, answers: %Grid{}
 
@@ -35,6 +35,22 @@ defmodule Slackword.ActiveCrossword do
       %Answer{x: x, y: y}
     else
       answer
+    end
+  end
+
+  def guess_word(%ActiveCrossword{crossword: crossword} = active_crossword, clue_idx, guess) do
+    guess_length = String.length(guess)
+    word = Crossword.get_word(crossword, clue_idx) 
+    word_length = Word.length(word)
+    cond do
+      guess_length > word_length -> {:error, {:too_long, word_length, guess_length}}
+      guess_length < word_length -> {:error, {:too_short, word_length, guess_length}}
+      true ->
+        guess = String.upcase(guess) |> String.codepoints
+        indexed_guesses = Stream.zip(Word.indexes(word), guess)
+        Enum.reduce(indexed_guesses, active_crossword, fn({{x, y}, letter}, a_c) -> 
+          ActiveCrossword.add_answer(a_c, %Answer{x: x, y: y, letter: letter})
+        end)
     end
   end
 

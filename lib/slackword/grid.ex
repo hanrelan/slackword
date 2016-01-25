@@ -1,8 +1,8 @@
 defmodule Slackword.GridSquare do
 
   def corners({x, y}, box_width) do
-    top_left_x = (y - 1) * box_width
-    top_left_y = (x - 1) * box_width
+    top_left_x = (x - 1) * box_width
+    top_left_y = (y - 1) * box_width
     {{top_left_x, top_left_y}, {top_left_x + box_width, top_left_y + box_width}}
   end
 

@@ -5,8 +5,8 @@ defmodule Slackword.Crossword.WordTest do
 
   test "new" do
     word = Word.new(%{id: "1", x_range: "1-3", y_range: "2"})
-    assert word.x_range == {1, 3}
-    assert word.y_range == {2, 2}
+    assert word.x_range == 1..3
+    assert word.y_range == 2..2
     assert word.id == "1"
   end
 
@@ -15,5 +15,10 @@ defmodule Slackword.Crossword.WordTest do
     assert word.direction == :across
     word = Word.new(%{id: "1", x_range: "1", y_range: "2-3"})
     assert word.direction == :down
+  end
+
+  test "length" do
+    word = Word.new(%{id: "1", x_range: "1-3", y_range: "2"})
+    assert Word.length(word) == 3
   end
 end

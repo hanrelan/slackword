@@ -38,8 +38,8 @@ defmodule Slackword.Crossword.ParserTest do
     assert hd(crossword.clues_down).text == "On your head"
     word = Crossword.get_word(crossword, {"2", :down})
     assert word.direction == :down
-    assert word.x_range == {2, 2}
-    assert word.y_range == {1, 3}
+    assert word.x_range == 2..2
+    assert word.y_range == 1..3
   end
   
 end
