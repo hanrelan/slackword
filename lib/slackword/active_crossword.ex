@@ -99,4 +99,8 @@ defmodule Slackword.ActiveCrossword do
     not any_errors
   end
 
+  def render_clues(%ActiveCrossword{crossword: crossword}) do
+    Crossword.render_clues(crossword)
+  end
+
 end

@@ -23,7 +23,7 @@ defmodule Slackword.Grid do
 
   def new(dimensions, cell_list) do
     cells = Enum.reduce(cell_list, %{}, &add_cell/2)
-    grid = %Grid{dimensions: dimensions, cells: cells}
+    %Grid{dimensions: dimensions, cells: cells}
   end
 
   def get(%Grid{cells: cells}, x, y) do

@@ -93,6 +93,10 @@ defmodule Slackword.Crossword.Clue do
     %Clue{format: format, number: number, word: word, direction: direction, text: text} 
   end
 
+  def render(%Clue{text: text, number: number, format: format}) do
+    "#{number}: #{text} (#{format})"
+  end
+
 end
 
 defmodule Slackword.Crossword do
@@ -134,6 +138,18 @@ defmodule Slackword.Crossword do
       Cell.render_to_image(cell, image, %{box_width: box_width, number_font: number_font})
     end)
     image
+  end
+
+  def render_clues(%Crossword{clues_across: clues_across, clues_down: clues_down}) do
+    IO.puts "Across"
+    render_clues_direction(clues_across)
+    IO.puts "------"
+    IO.puts "Down"
+    render_clues_direction(clues_down)
+  end
+
+  defp render_clues_direction(clues) do
+    Enum.each(clues, &(IO.puts Clue.render(&1)))
   end
 
 end
