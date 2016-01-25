@@ -63,7 +63,7 @@ defmodule Slackword.ActiveCrosswordTest do
   end
 
   test "guessing word fills in answers", %{active_crossword: active_crossword} do
-    active_crossword = ActiveCrossword.guess_word(active_crossword, {"3", :across}, "an")
+    {:ok, active_crossword} = ActiveCrossword.guess_word(active_crossword, {"3", :across}, "an")
     assert ActiveCrossword.get_answer(active_crossword, 1, 2).letter == "A"
     assert ActiveCrossword.get_answer(active_crossword, 2, 2).letter == "N"
   end

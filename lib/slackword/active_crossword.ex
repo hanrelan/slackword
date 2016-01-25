@@ -48,9 +48,10 @@ defmodule Slackword.ActiveCrossword do
       true ->
         guess = String.upcase(guess) |> String.codepoints
         indexed_guesses = Stream.zip(Word.indexes(word), guess)
-        Enum.reduce(indexed_guesses, active_crossword, fn({{x, y}, letter}, a_c) -> 
+        active_crossword = Enum.reduce(indexed_guesses, active_crossword, fn({{x, y}, letter}, a_c) -> 
           ActiveCrossword.add_answer(a_c, %Answer{x: x, y: y, letter: letter})
         end)
+        {:ok, active_crossword}
     end
   end
 
