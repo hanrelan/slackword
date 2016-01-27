@@ -1,4 +1,4 @@
-defmodule Slackword.Downloader do
+defmodule Slackword.Crossword.Downloader do
   @static_dir "privstatic"
   use Timex
 

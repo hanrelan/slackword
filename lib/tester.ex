@@ -20,8 +20,7 @@ defmodule Tester do
   def guess(active_crossword, idx, guess) do
     case ActiveCrossword.guess_word(active_crossword, idx, guess) do
       {:ok, ac} -> 
-        show
-        ac
+        show(ac)
       {:error, error} -> 
         IO.inspect error
         active_crossword
