@@ -1,14 +1,10 @@
 ExUnit.start()
 
 defmodule TestHelper do
-  @static_dir "test/privstatic"
-  def test_crossword_xml do
-    {:ok, file} = File.read "#{@static_dir}/test_crossword.xml"
-    file
-  end
+  @static_dir Application.get_env(:slackword, :private_static_dir)
 
   def test_crossword do
-    Slackword.Crossword.Parser.parse(test_crossword_xml)
+    Slackword.Crossword.new(Timex.Date.now)
   end
 
   def test_crossword_png do

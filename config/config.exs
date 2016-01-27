@@ -27,4 +27,7 @@ use Mix.Config
 # Configuration from the imported file will override the ones defined
 # here (which is why it is important to import them last).
 #
-#     import_config "#{Mix.env}.exs"
+config :slackword, :downloader, Slackword.Crossword.Downloader
+config :slackword, :private_static_dir, Path.join(["test", "privstatic"])
+
+import_config "#{Mix.env}.exs"

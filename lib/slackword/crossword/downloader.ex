@@ -1,5 +1,5 @@
 defmodule Slackword.Crossword.Downloader do
-  @static_dir "privstatic"
+  @static_dir Application.get_env(:slackword, :private_static_dir)
   use Timex
 
   def get(%DateTime{} = date) do

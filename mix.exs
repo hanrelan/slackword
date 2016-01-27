@@ -7,6 +7,7 @@ defmodule Slackword.Mixfile do
      elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     elixirc_paths: elixirc_paths(Mix.env),
      deps: deps]
   end
 
@@ -34,4 +35,7 @@ defmodule Slackword.Mixfile do
       {:sweet_xml, "~> 0.5.0"}
     ]
   end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_),     do: ["lib"]
 end

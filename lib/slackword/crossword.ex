@@ -10,10 +10,12 @@ defmodule Slackword.Crossword do
   alias Slackword.{Crossword, Grid}
   alias Slackword.Crossword.{Metadata, Cell, Clue}
 
+  @downloader Application.get_env(:slackword, :downloader)
+
   defstruct metadata: %Metadata{}, grid: %Grid{}, clues: %{}, clues_across: [], clues_down: []
 
   def new(%Timex.DateTime{} = date) do
-    Slackword.Crossword.Downloader.get(date) |> Slackword.Crossword.Parser.parse
+    @downloader.get(date) |> Slackword.Crossword.Parser.parse
   end
 
   def get(%Crossword{grid: grid}, x, y) do
