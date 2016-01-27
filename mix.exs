@@ -8,6 +8,7 @@ defmodule Slackword.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      elixirc_paths: elixirc_paths(Mix.env),
+     test_coverage: [tool: Coverex.Task],
      deps: deps]
   end
 
@@ -32,7 +33,8 @@ defmodule Slackword.Mixfile do
       {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.1.2"},
       {:httpotion, "~> 2.1.0"},
       {:timex, "~> 1.0.0"},
-      {:sweet_xml, "~> 0.5.0"}
+      {:sweet_xml, "~> 0.5.0"},
+      {:coverex, "~> 1.4.7", only: :test}
     ]
   end
 
