@@ -34,6 +34,7 @@ defmodule Slackword.Mixfile do
       {:httpotion, "~> 2.1.0"},
       {:timex, "~> 1.0.0"},
       {:sweet_xml, "~> 0.5.0"},
+      {:html_entities, "~> 0.2"},
       {:coverex, "~> 1.4.7", only: :test}
     ]
   end

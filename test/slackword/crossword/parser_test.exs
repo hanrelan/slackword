@@ -35,7 +35,7 @@ defmodule Slackword.Crossword.ParserTest do
     assert length(crossword.clues_across) == 3
     assert length(crossword.clues_down) == 2
     assert hd(crossword.clues_across).format == "3"
-    assert hd(crossword.clues_down).text == "On your head"
+    assert hd(crossword.clues_down).text == "It's on your head"
     word = Crossword.get_word(crossword, {"2", :down})
     assert word.direction == :down
     assert word.x_range == 2..2

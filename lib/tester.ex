@@ -26,4 +26,12 @@ defmodule Tester do
         active_crossword
     end
   end
+
+  def across(active_crossword, number, the_guess) do
+    guess(active_crossword, {:across, number}, the_guess)
+  end
+
+  def down(active_crossword, number, the_guess) do
+    guess(active_crossword, {:down, number}, the_guess)
+  end
 end
