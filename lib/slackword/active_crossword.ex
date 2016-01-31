@@ -4,7 +4,7 @@ defmodule Slackword.ActiveCrossword.Answer do
   defstruct letter: "", x: 0, y: 0
 
   @letter_color :egd.color(:black)
-  @letter_color_incorrect :egd.color(:red)
+  @letter_color_incorrect :egd.color({255, 0, 0})
 
   def render_to_image(%Answer{letter: letter} = answer, image, %{box_width: box_width, letter_font: letter_font}, incorrect \\ false) do
     letter_color = if incorrect, do: @letter_color_incorrect, else: @letter_color
