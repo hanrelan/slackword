@@ -4,9 +4,11 @@ defmodule Slackword.ActiveCrossword.Answer do
   defstruct letter: "", x: 0, y: 0
 
   @letter_color :egd.color(:black)
+  @letter_color_incorrect :egd.color(:red)
 
-  def render_to_image(%Answer{letter: letter} = answer, image, %{box_width: box_width, letter_font: letter_font}) do
-    GridSquare.render_letter_to_image(image, {answer.x, answer.y}, letter, box_width, %{letter_font: letter_font, letter_color: @letter_color})
+  def render_to_image(%Answer{letter: letter} = answer, image, %{box_width: box_width, letter_font: letter_font}, incorrect \\ false) do
+    letter_color = if incorrect, do: @letter_color_incorrect, else: @letter_color
+    GridSquare.render_letter_to_image(image, {answer.x, answer.y}, letter, box_width, %{letter_font: letter_font, letter_color: letter_color})
   end
 
 end
@@ -70,15 +72,17 @@ defmodule Slackword.ActiveCrossword do
     base_image = Crossword.render(crossword, output_width, output_height)
     box_width = Grid.box_width(answers, output_width, output_height)
     letter_font = :egd_font.load(@letter_font_path)
+    settings = %{box_width: box_width, letter_font: letter_font}
     Grid.reduce(crossword.grid, base_image, fn({_x, _y, cell=%Cell{x: x, y: y, solution: solution}}, image) ->
       %Answer{letter: letter} = answer = ActiveCrossword.get_answer(active_crossword, x, y)
       cond do
         Crossword.block?(cell) -> image
-        letter == "" and show_solutions == false -> image
-        (letter == "" and show_solutions == true) or (letter != solution) ->
-          Cell.render_solution(cell, image, %{box_width: box_width, letter_font: letter_font})
         letter == solution ->
-          Answer.render_to_image(answer, image, %{box_width: box_width, letter_font: letter_font})
+          Answer.render_to_image(answer, image, settings)
+        show_solutions == true ->
+          Cell.render_solution(cell, image, settings)
+        letter != solution ->
+          Answer.render_to_image(answer, image, settings, true)
       end 
     end)
     :egd.render(base_image, :png)

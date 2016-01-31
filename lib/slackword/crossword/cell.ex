@@ -33,7 +33,7 @@ defmodule Slackword.Crossword.Cell do
     end
     image
   end
-
+  
   def render_solution(%Cell{} = cell, image, %{box_width: box_width, letter_font: letter_font}) do
     GridSquare.render_letter_to_image(image, {cell.x, cell.y}, cell.solution, box_width, %{letter_font: letter_font, letter_color: @letter_color})
   end
