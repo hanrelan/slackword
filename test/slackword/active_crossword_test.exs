@@ -62,6 +62,10 @@ defmodule Slackword.ActiveCrosswordTest do
     assert ActiveCrossword.guess_word(active_crossword, {"3", :across}, "a") == {:error, {:too_short, 2, 1}}
   end
 
+  test "guessing work fails if not a valid word", %{active_crossword: active_crossword} do
+    assert ActiveCrossword.guess_word(active_crossword, {"3", :down}, "an") == {:error, :invalid_word}
+  end
+
   test "guessing word fills in answers", %{active_crossword: active_crossword} do
     {:ok, active_crossword} = ActiveCrossword.guess_word(active_crossword, {"3", :across}, "an")
     assert ActiveCrossword.get_answer(active_crossword, 1, 2).letter == "A"

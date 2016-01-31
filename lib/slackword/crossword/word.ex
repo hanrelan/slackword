@@ -23,6 +23,7 @@ defmodule Slackword.Crossword.Word do
 
   def length(%Word{direction: :across, x_range: x_range}), do: Enum.count(x_range)
   def length(%Word{direction: :down, y_range: y_range}), do: Enum.count(y_range)
+  def length(nil), do: 0
 
   def indexes(%Word{direction: :across, x_range: x_range, y_range: y..y}) do
     Enum.map(x_range, &({&1, y}))

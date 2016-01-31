@@ -43,6 +43,7 @@ defmodule Slackword.ActiveCrossword do
     word = Crossword.get_word(crossword, clue_idx) 
     word_length = Word.length(word)
     cond do
+      word == nil -> {:error, :invalid_word}
       guess_length > word_length -> {:error, {:too_long, word_length, guess_length}}
       guess_length < word_length -> {:error, {:too_short, word_length, guess_length}}
       true ->
