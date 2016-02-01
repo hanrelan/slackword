@@ -15,6 +15,7 @@ defmodule Slackword.Crossword do
   defstruct metadata: %Metadata{}, grid: %Grid{}, clues: %{}, clues_across: [], clues_down: []
 
   def new(%Timex.DateTime{} = date) do
+    # TODO: handle the case where the downloader fails
     @downloader.get(date) |> Slackword.Crossword.Parser.parse
   end
 
