@@ -13,6 +13,11 @@ defmodule Slackword.ServerTest do
     assert Server.new_crossword(server, Date.now) == :ok
   end
 
+  test "starting a new crossword when a crossword has been started should fail", %{server: server} do
+    assert Server.new_crossword(server, Date.now) == :ok
+    assert Server.new_crossword(server, Date.now) == {:error, :already_exists}
+  end
+
   test "executing commands without a loaded crossword should fail", %{server: server} do
     assert Server.guess_word(server, {"3", :across}, "an") == {:error, :no_crossword}
   end
