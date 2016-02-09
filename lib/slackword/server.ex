@@ -1,4 +1,5 @@
 defmodule With do
+
   defmacro crossword(state, expression) do
     do_statement = Keyword.get(expression, :do)
     quote do
@@ -10,6 +11,7 @@ defmodule With do
       end
     end
   end
+
 end
 
 defmodule Slackword.Server do
@@ -31,6 +33,10 @@ defmodule Slackword.Server do
 
   def guess_word(server, clue_idx, guess) do
     GenServer.call(server, {:guess_word, clue_idx, guess})
+  end
+
+  def stop(server) do
+    GenServer.stop(server)
   end
 
   ## Server API

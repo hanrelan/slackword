@@ -16,7 +16,9 @@ defmodule Slackword.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :tzdata, :httpotion]]
+    [applications: [:logger, :tzdata, :httpotion],
+     mod: {Slackword, []}
+    ]
   end
 
   # Dependencies can be Hex packages:
