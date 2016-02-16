@@ -16,7 +16,7 @@ defmodule Slackword.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :tzdata, :httpotion],
+    [applications: [:logger, :tzdata, :httpotion, :cowboy, :plug],
      mod: {Slackword, []}
     ]
   end
@@ -32,6 +32,8 @@ defmodule Slackword.Mixfile do
   # Type "mix help deps" for more examples and options
   defp deps do
     [
+      {:cowboy, "~> 1.0.0"},
+      {:plug, "~> 1.0"},
       {:ibrowse, github: "cmullaparthi/ibrowse", tag: "v4.1.2"},
       {:httpotion, "~> 2.1.0"},
       {:timex, "~> 1.0.0"},
