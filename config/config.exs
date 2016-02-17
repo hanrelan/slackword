@@ -30,5 +30,6 @@ use Mix.Config
 config :slackword, :downloader, Slackword.Crossword.Downloader
 config :slackword, :private_static_dir, Path.join(["test", "privstatic"])
 config :slackword, :slack_api_token, System.get_env("SLACK_API_TOKEN")
+config :slackword, :db_dir, "db"
 
 import_config "#{Mix.env}.exs"

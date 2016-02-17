@@ -3,6 +3,7 @@ defmodule Slackword.SlashCommand do
 
   plug Plug.Parsers, parsers: [:urlencoded]
   plug :validate_token
+  plug :parse_text
   plug :match
   plug :dispatch
 
@@ -13,17 +14,11 @@ defmodule Slackword.SlashCommand do
   end
 
   post "/cw" do
-    conn |> parse_text |> handle_command 
+    conn |> handle_command 
   end
 
   match _ do
     conn |> send_resp(404, "oops")
-  end
-
-  defp parse_text(conn) do
-    text = conn.params["text"] |> String.strip
-    commands = String.split(text, ~r/\s+/)
-    conn |> assign(:command, hd(commands)) |> assign(:commands, commands) 
   end
 
   defp handle_command(conn) do
@@ -37,6 +32,12 @@ defmodule Slackword.SlashCommand do
     else
       conn
     end
+  end
+
+  defp parse_text(conn, _) do
+    text = conn.params["text"] |> String.strip
+    commands = String.split(text, ~r/\s+/)
+    conn |> assign(:command, hd(commands)) |> assign(:commands, commands) 
   end
 
 end

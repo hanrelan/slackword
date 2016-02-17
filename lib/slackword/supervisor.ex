@@ -7,6 +7,7 @@ defmodule Slackword.Supervisor do
 
   def init(:ok) do
     children = [
+      worker(Slackword.Database, []),
       worker(Slackword.Registry, [Slackword.Registry]),
       supervisor(Slackword.ServerSupervisor, [])
     ]
