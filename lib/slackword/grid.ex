@@ -44,9 +44,9 @@ defmodule Slackword.Grid do
 
   def box_width(%Grid{dimensions: {width, height}}, output_width, output_height) do
     if Float.floor(output_width/width) <= Float.floor(output_height/height) do
-      Float.floor(output_width/width) |> round
+      Float.floor(output_width/width) |> trunc
     else
-      Float.floor(output_height/height) |> round
+      Float.floor(output_height/height) |> trunc
     end
   end
 

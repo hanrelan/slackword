@@ -28,7 +28,7 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 config :slackword, :downloader, Slackword.Crossword.Downloader
-config :slackword, :private_static_dir, Path.join(["test", "privstatic"])
+config :slackword, :private_static_dir, "privstatic"
 config :slackword, :slack_api_token, System.get_env("SLACK_API_TOKEN")
 config :slackword, :db_dir, "db"
 

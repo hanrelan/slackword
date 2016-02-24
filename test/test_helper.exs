@@ -1,4 +1,5 @@
-ExUnit.start()
+colors = (System.get_env("VIMRUNTIME") == nil)
+ExUnit.start(colors: [enabled: colors])
 
 defmodule TestHelper do
   @static_dir Application.get_env(:slackword, :private_static_dir)
