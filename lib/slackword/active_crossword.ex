@@ -18,7 +18,7 @@ defmodule Slackword.ActiveCrossword do
   alias Slackword.ActiveCrossword.Answer
   alias Slackword.Crossword.{Cell, Word}
 
-  defstruct crossword: %Crossword{}, answers: %Grid{}
+  defstruct crossword: %Crossword{}, answers: %Grid{}, id: 0
 
   @letter_font_path Path.join(["privstatic", "fonts", "osx", "Terminus16.wingsfont"])
 
@@ -26,9 +26,9 @@ defmodule Slackword.ActiveCrossword do
     %ActiveCrossword{crossword: crossword, answers: %Grid{dimensions: grid.dimensions}}
   end
 
-  def add_answer(%ActiveCrossword{answers: answers} = active_crossword, %Answer{} = answer) do
+  def add_answer(%ActiveCrossword{answers: answers, id: id} = active_crossword, %Answer{} = answer) do
     answers = Grid.add(answers, answer.x, answer.y, answer) 
-    %{active_crossword | answers: answers}
+    %{active_crossword | answers: answers, id: id + 1}
   end
 
   def get_answer(%ActiveCrossword{answers: answers}, x, y) do

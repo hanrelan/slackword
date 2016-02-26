@@ -72,4 +72,11 @@ defmodule Slackword.ActiveCrosswordTest do
     assert ActiveCrossword.get_answer(active_crossword, 2, 2).letter == "N"
   end
 
+  test "adding an answer increments the id", %{active_crossword: active_crossword} do
+    id = active_crossword.id
+    {:ok, active_crossword} = ActiveCrossword.guess_word(active_crossword, {"3", :across}, "an")
+    new_id = active_crossword.id
+    assert new_id > id
+  end
+
 end

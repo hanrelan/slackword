@@ -29,6 +29,7 @@ use Mix.Config
 #
 config :slackword, :downloader, Slackword.Crossword.Downloader
 config :slackword, :private_static_dir, "privstatic"
+config :slackword, :public_static_dir, "public"
 config :slackword, :slack_api_token, System.get_env("SLACK_API_TOKEN")
 config :slackword, :db_dir, "db"
 

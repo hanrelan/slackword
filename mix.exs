@@ -39,8 +39,8 @@ defmodule Slackword.Mixfile do
       {:timex, "~> 1.0.0"},
       {:sweet_xml, "~> 0.5.0"},
       {:html_entities, "~> 0.2"},
-      {:cowdb, github: "refuge/cowdb", tag: :master},
-      {:coverex, "~> 1.4.7", only: :test}
+      {:poison, "~> 2.0"},
+      {:cowdb, github: "refuge/cowdb", tag: :master}
     ]
   end
 

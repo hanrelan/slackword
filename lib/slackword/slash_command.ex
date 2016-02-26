@@ -1,4 +1,6 @@
 defmodule Slackword.SlashCommand do
+  @public_static_dir Application.get_env(:slackword, :public_static_dir)
+
   use Plug.Router
 
   plug Plug.Parsers, parsers: [:urlencoded]
@@ -23,8 +25,13 @@ defmodule Slackword.SlashCommand do
   end
 
   defp handle_command(conn) do
-    response = Response.handle_command(conn.assigns[:command], conn.assigns[:channel_id], conn.assigns[:commands])
-    send_resp(conn, 200, response)
+    response = Response.handle_command(conn.assigns[:command], conn)
+    content_type = "text/plain"
+    if is_map(response) do
+      response = Poison.Encoder.encode(response, [])
+      content_type = "application/json"
+    end
+    conn |> put_resp_content_type(content_type) |> send_resp(200, response)
   end
 
   defp validate_token(conn, _) do
@@ -42,7 +49,7 @@ defmodule Slackword.SlashCommand do
   end
 
   defp set_channel_id(conn, _) do
-    channel_id = "#{conn.params["team_id"]}:#{conn.params["channel_id"]}"
+    channel_id = "#{conn.params["team_id"]}_#{conn.params["channel_id"]}"
     conn |> assign(:channel_id, channel_id)
   end
 
