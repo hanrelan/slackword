@@ -58,7 +58,7 @@ defmodule Slackword.ActiveCrossword do
     end
   end
 
-  def render(%ActiveCrossword{crossword: crossword, answers: answers}, output_width \\ 400, output_height \\ 500) do
+  def render(%ActiveCrossword{crossword: crossword, answers: answers}, output_width \\ 800, output_height \\ 800) do
     base_image = Crossword.render(crossword, output_width, output_height)
     box_width = Grid.box_width(answers, output_width, output_height)
     letter_font = :egd_font.load(@letter_font_path)
@@ -68,7 +68,7 @@ defmodule Slackword.ActiveCrossword do
     :egd.render(base_image, :png)
   end
 
-  def render_errors(%ActiveCrossword{crossword: crossword, answers: answers} = active_crossword, show_solutions \\ false, output_width \\ 400, output_height \\ 500) do
+  def render_errors(%ActiveCrossword{crossword: crossword, answers: answers} = active_crossword, show_solutions \\ false, output_width \\ 800, output_height \\ 800) do
     base_image = Crossword.render(crossword, output_width, output_height)
     box_width = Grid.box_width(answers, output_width, output_height)
     letter_font = :egd_font.load(@letter_font_path)
@@ -104,8 +104,8 @@ defmodule Slackword.ActiveCrossword do
     not any_errors
   end
 
-  def render_clues(%ActiveCrossword{crossword: crossword}) do
-    Crossword.render_clues(crossword)
+  def get_clues(%ActiveCrossword{crossword: crossword}) do
+    Crossword.get_clues(crossword)
   end
 
 end

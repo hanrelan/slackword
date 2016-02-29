@@ -6,11 +6,12 @@ defmodule Slackword.SlashCommand do
   plug Plug.Parsers, parsers: [:urlencoded]
   plug :validate_token
   plug :set_channel_id
-  plug :parse_text
+  plug :set_command
+  plug :set_server
   plug :match
   plug :dispatch
 
-  alias Slackword.Response
+  alias Slackword.{Database, Response, Registry}
 
   def start_server do
     Plug.Adapters.Cowboy.http(__MODULE__, nil, port: 3000)
@@ -42,15 +43,33 @@ defmodule Slackword.SlashCommand do
     end
   end
 
-  defp parse_text(conn, _) do
+  defp set_command(conn, _) do
     text = conn.params["text"] |> String.strip
     commands = String.split(text, ~r/\s+/)
-    conn |> assign(:command, hd(commands)) |> assign(:commands, commands) 
+    conn |> assign(:command, hd(commands)) |> assign(:arguments, tl(commands)) 
   end
 
   defp set_channel_id(conn, _) do
     channel_id = "#{conn.params["team_id"]}_#{conn.params["channel_id"]}"
     conn |> assign(:channel_id, channel_id)
+  end
+
+  defp set_server(conn, _) do
+    if set_server_for_command?(conn.assigns[:command]) do
+      channel_id = conn.assigns[:channel_id]
+      crossword_id = Database.get_game_id(channel_id)
+      server = Registry.find_or_create(Slackword.Registry, {channel_id, crossword_id})
+      conn |> assign(:crossword_id, crossword_id) |> assign(:server, server)
+    else
+      conn
+    end
+  end
+
+  defp set_server_for_command?(command) do
+    cond do
+      command in ["clues"] -> true
+      true -> false
+    end
   end
 
 end

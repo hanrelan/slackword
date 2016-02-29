@@ -31,6 +31,10 @@ defmodule Slackword.Server do
     GenServer.call(server, {:new_crossword, date})
   end
 
+  def get_crossword(server) do
+    GenServer.call(server, {:get_crossword})
+  end
+
   def guess_word(server, clue_idx, guess) do
     GenServer.call(server, {:guess_word, clue_idx, guess})
   end
@@ -52,6 +56,12 @@ defmodule Slackword.Server do
   def handle_call({:new_crossword, %Timex.DateTime{} = date}, _from, state) do
     crossword = ActiveCrossword.new(Slackword.Crossword.new(date))
     {:reply, {:ok, crossword}, Map.put(state, :crossword, crossword)} 
+  end
+
+  def handle_call({:get_crossword}, _from, state) do
+    With.crossword(state) do
+      {:reply, {:ok, crossword}, state}
+    end
   end
 
   def handle_call({:guess_word, clue_idx, guess}, _from, state) do

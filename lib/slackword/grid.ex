@@ -43,11 +43,19 @@ defmodule Slackword.Grid do
   end
 
   def box_width(%Grid{dimensions: {width, height}}, output_width, output_height) do
+    # TODO(rohan): Put these magic numbers somewhere else
+    output_width = min(output_width, 400)
+    output_height = min(output_height, 400)
     if Float.floor(output_width/width) <= Float.floor(output_height/height) do
       Float.floor(output_width/width) |> trunc
     else
       Float.floor(output_height/height) |> trunc
     end
+  end
+
+  def right_edge(%Grid{dimensions: {width, _height}} = grid, output_width, output_height) do
+    box_width = box_width(grid, output_width, output_height)
+    box_width * width
   end
 
   defp add_cell({x, y, cell}, cells) do
