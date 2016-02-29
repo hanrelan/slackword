@@ -12,8 +12,9 @@ defmodule Slackword.Crossword do
 
   @downloader Application.get_env(:slackword, :downloader)
   @clue_color :egd.color(:black)
-  #@clue_font_path Path.join(["privstatic", "fonts", "osx", "CJK-12.wingsfont"])
   @clue_font_path Path.join(["privstatic", "fonts", "osx", "fixed6x12.wingsfont"])
+  @padding 5
+
 
   defstruct metadata: %Metadata{}, grid: %Grid{}, clues: %{}, clues_across: [], clues_down: []
 
@@ -50,46 +51,50 @@ defmodule Slackword.Crossword do
     Grid.reduce(grid, image, fn({_x, _y, cell = %Cell{}}, image) ->
       Cell.render_to_image(cell, image, %{box_width: box_width, number_font: number_font})
     end)
-    offset = Grid.right_edge(grid, output_width, output_height)
-    image = render_clues(crossword, image, offset, output_width, output_height)
+    size = Grid.rendered_size(grid, output_width, output_height)
+    image = render_clues(crossword, image, size, output_width, output_height)
     image
   end
 
-  def render_clues(%Crossword{clues_across: clues_across, clues_down: clues_down}, image, left, width, height) do
-    center_x = ((width - left)/2 |> trunc) + left
-    :egd.line(image, {center_x, 0}, {center_x, height}, @clue_color)
-    render_clues_direction(image, clues_across, 'ACROSS', left, {center_x - left, height})
-    render_clues_direction(image, clues_down, 'DOWN', center_x, {width - center_x, height})
-    image
-  end
-
-  def render_clues_direction(image, clues, header, start_x, {width, height}) do
-    clue_font = :egd_font.load(@clue_font_path)
-    {font_w, font_h} = :egd_font.size(clue_font)
-    current_y = 2
-    start_x = start_x + 5
-    :egd.text(image, {start_x, current_y}, clue_font, header, @clue_color)
-    current_y = current_y + font_h + 5
-    wrapped_clues = Stream.flat_map(clues, fn clue -> Clue.render(clue) |> Slackword.StringHelper.wrap_to_lines(width - 10, font_w + 2) end)
-    Enum.reduce(wrapped_clues, {image, current_y}, fn(clue, {image, current_y}) ->
-      :egd.text(image, {start_x, current_y}, clue_font, to_char_list(clue), @clue_color)
-      current_y = current_y + font_h + 5
-      {image, current_y}
+  defp render_clues(%Crossword{clues_across: clues_across, clues_down: clues_down}, image, {size_x, size_y}, width, height) do
+    bottom_height = height - size_y
+    bottom_mid_width = size_x/2 |> trunc
+    right_mid_width = (width - size_x)/2 |> trunc
+    columns = [{0, size_y, bottom_mid_width, bottom_height},
+               {bottom_mid_width, size_y, bottom_mid_width, bottom_height},
+               {size_x, 0, right_mid_width, height},
+               {right_mid_width + size_x, 0, right_mid_width, height}]
+    Enum.each(columns, fn {x, y, w, h} ->
+      :egd.line(image, {x + w, y + @padding}, {x + w, y + h - @padding}, @clue_color)
+    end)
+    all_clues = Enum.concat([["ACROSS"], Enum.map(clues_across, &Clue.render(&1)), 
+                   ["DOWN"], Enum.map(clues_down, &Clue.render(&1))])
+    {image, []} = Enum.reduce(columns, {image, all_clues}, fn({_x, y, _w, _h} = column, {image, clues_remaining}) ->
+      render_into_column(image, clues_remaining, column, y + @padding)
     end)
     image
   end
 
-  def get_clues(%Crossword{clues_across: clues_across, clues_down: clues_down}) do
-    result = ""
-    result = result <> "\n*Across*\n"
-    result = result <> get_clues_direction(clues_across)
-    result = result <> "*Down*\n"
-    result = result <> get_clues_direction(clues_down)
-    result
+  defp render_into_column(image, [clue | remaining_clues] = clues, {x, y, w, h} = column, current_y) do
+    clue_font = :egd_font.load(@clue_font_path)
+    {font_w, font_h} = :egd_font.size(clue_font)
+    x = x + @padding
+    wrapped_clue = Slackword.StringHelper.wrap_to_lines(clue, w - 10, font_w + 2) 
+    clue_height = Enum.count(wrapped_clue) * (font_h + @padding)
+    if (clue_height + current_y) > (y + h) do
+      {image, clues}
+    else
+      {image, current_y} = Enum.reduce(wrapped_clue, {image, current_y}, fn(clue, {image, this_y}) ->
+        :egd.text(image, {x, this_y}, clue_font, to_char_list(clue), @clue_color)
+        this_y = this_y + font_h + @padding
+        {image, this_y}
+      end)
+      render_into_column(image, remaining_clues, column, current_y)
+    end
   end
 
-  defp get_clues_direction(clues) do
-    Stream.map(clues, &Clue.render(&1)) |> Enum.join("\n")
+  defp render_into_column(image, [], _, _) do
+    {image, []}
   end
 
 end

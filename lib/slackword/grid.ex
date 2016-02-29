@@ -53,9 +53,9 @@ defmodule Slackword.Grid do
     end
   end
 
-  def right_edge(%Grid{dimensions: {width, _height}} = grid, output_width, output_height) do
+  def rendered_size(%Grid{dimensions: {width, height}} = grid, output_width, output_height) do
     box_width = box_width(grid, output_width, output_height)
-    box_width * width
+    {box_width * width, box_width * height}
   end
 
   defp add_cell({x, y, cell}, cells) do

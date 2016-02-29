@@ -10,14 +10,16 @@ defmodule Slackword.StringHelper do
     if word_width <= width_left do
       wrap_words(words_rest, [word | current_line], width_left - word_width, result, line_width, letter_width)
     else
-      current_line_string = current_line |> Enum.reverse |> Enum.join(" ")
-      wrap_words(words, [], line_width, [current_line_string | result], line_width, letter_width)
+      wrap_words(words, [], line_width, [line_to_string(current_line) | result], line_width, letter_width)
     end
   end
 
   defp wrap_words([], current_line, _width_left, result, _line_width, _letter_width) do
-    current_line_string = current_line |> Enum.reverse |> Enum.join(" ")
-    Enum.reverse([current_line_string | result])
+    Enum.reverse([line_to_string(current_line) | result])
+  end
+
+  defp line_to_string(line) do
+    line |> Enum.reverse |> Enum.join(" ")
   end
 
 end

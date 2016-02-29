@@ -14,7 +14,7 @@ defmodule Slackword.Response do
     crossword_id = Database.new_game_id(channel_id)
     server = Registry.find_or_create(Slackword.Registry, {channel_id, crossword_id})
     {:ok, crossword} = Server.new_crossword(server, date)
-    png = ActiveCrossword.render(crossword, 800, 800)
+    png = ActiveCrossword.render(crossword, 750, 750)
     filename = png_filename(channel_id, crossword_id, crossword)
     :egd.save(png, Path.join([@public_images_dir, filename]))
     %{response_type: "in_channel", 
@@ -26,13 +26,6 @@ defmodule Slackword.Response do
         }
       ]
      }
-  end
-
-  def handle_command("clues", conn) do
-    server = conn.assigns[:server]
-    {:ok, crossword} = Server.get_crossword(server)
-    clues = ActiveCrossword.get_clues(crossword)
-    %{response_type: "in_channel", text: clues}
   end
 
   def handle_command("help", _conn) do

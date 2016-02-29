@@ -67,7 +67,7 @@ defmodule Slackword.SlashCommand do
 
   defp set_server_for_command?(command) do
     cond do
-      command in ["clues"] -> true
+      command in [] -> true
       true -> false
     end
   end

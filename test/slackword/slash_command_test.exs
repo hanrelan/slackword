@@ -34,15 +34,15 @@ defmodule Slackword.SlashCommandTest do
     assert conn.assigns[:arguments] == ["cat"]
   end
 
-  test "sets the server for some commands" do
-    conn = create_conn
-    assert conn.state == :sent
-    assert conn.assigns[:server] == nil
-
-    create_conn(text: "new", channel_id: "channel1")
-    conn = create_conn(text: "clues", channel_id: "channel1")
-    refute conn.assigns[:server] == nil
-  end
+  #  test "sets the server for some commands" do
+  #    conn = create_conn
+  #    assert conn.state == :sent
+  #    assert conn.assigns[:server] == nil
+  #
+  #    create_conn(text: "new", channel_id: "channel1")
+  #    conn = create_conn(text: "clues", channel_id: "channel1")
+  #    refute conn.assigns[:server] == nil
+  #  end
 
   defp create_conn(params \\ %{}) do
     merged_map = Dict.merge(%{token: @token, text: "test", team_id: "team", channel_id: "channel"}, params)
