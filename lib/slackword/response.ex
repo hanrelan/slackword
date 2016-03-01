@@ -53,21 +53,24 @@ defmodule Slackword.Response do
     end
   end
 
-  defp render_crossword(server, conn, _options \\ []) do
+  defp render_crossword(server, conn, options \\ []) do
     channel_id = conn.assigns[:channel_id]
     crossword_id = conn.assigns[:crossword_id]
     {:ok, crossword} = Server.get_crossword(server)
+    if ActiveCrossword.solved?(crossword) do
+      options = Dict.merge(options, pretext: "SOLVED!!!")
+    end
     png = ActiveCrossword.render(crossword, 750, 750)
     filename = png_filename(channel_id, crossword_id, crossword)
     :egd.save(png, Path.join([@public_images_dir, filename]))
+    attachment = 
+      Dict.merge(%{image_url: image_url(conn, filename),
+        fallback: "Crossword #{crossword_id}",
+        title: "Crossword #{crossword_id}",
+        title_link: image_url(conn, filename),
+        }, options)
     %{response_type: "in_channel", 
-      attachments: [
-        %{image_url: image_url(conn, filename),
-          fallback: "Crossword",
-          title: "Crossword",
-          title_link: image_url(conn, filename)
-         }
-      ]
+      attachments: [attachment]
      }
   end
 
