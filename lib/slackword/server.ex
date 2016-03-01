@@ -39,8 +39,16 @@ defmodule Slackword.Server do
     GenServer.call(server, {:guess_word, clue_idx, guess})
   end
 
+  def load_crossword(server) do
+    GenServer.call(server, {:load_crossword})
+  end
+
   def stop(server) do
     GenServer.stop(server)
+  end
+
+  defp save_crossword(server) do
+    GenServer.cast(server, {:save_crossword})
   end
 
   ## Server API
@@ -55,6 +63,7 @@ defmodule Slackword.Server do
 
   def handle_call({:new_crossword, %Timex.DateTime{} = date}, _from, state) do
     crossword = ActiveCrossword.new(Slackword.Crossword.new(date))
+    save_crossword(self())
     {:reply, :ok, Map.put(state, :crossword, crossword)} 
   end
 
@@ -70,9 +79,27 @@ defmodule Slackword.Server do
         {:error, error} ->
           {:reply, {:error, error}, state}
         {:ok, crossword} ->
+          save_crossword(self())
           {:reply, :ok, %{state | crossword: crossword}}
       end
     end
+  end
+
+  def handle_call({:load_crossword}, _from, %{crossword: _crossword} = state) do
+    {:reply, :ok, state} 
+  end
+
+  def handle_call({:load_crossword}, _from, %{id: id} = state) do
+    case Slackword.Database.load_crossword(id) do
+      :not_found -> {:reply, {:error, :not_found}, state}
+      crossword -> {:reply, :ok, Map.put(state, :crossword, crossword)}
+    end
+  end
+
+  def handle_cast({:save_crossword}, %{id: id, crossword: crossword} = state) do
+    # TODO(rohan): Should eventually only save the answers
+    Slackword.Database.save_crossword(id, crossword)
+    {:noreply, state}
   end
 
 end

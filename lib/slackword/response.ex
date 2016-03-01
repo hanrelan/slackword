@@ -25,6 +25,11 @@ defmodule Slackword.Response do
     "hi!"
   end
 
+  def handle_command("show", conn) do
+    server = conn.assigns[:server]
+    render_crossword(server, conn)
+  end
+
   def handle_command(cmd, conn) do
     parsed_guess = Slackword.StringHelper.parse_guess(cmd)
     if parsed_guess != nil do

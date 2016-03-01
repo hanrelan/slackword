@@ -28,4 +28,12 @@ defmodule Slackword.ServerTest do
     assert Server.guess_word(server, {"3", :across}, "an") == :ok
   end
 
+  test "loading a crossword with the same id should restore original crossword", %{server: server} do
+    Server.new_crossword(server, Date.now)
+    Server.stop(server)
+    {:ok, server} = Server.start_link("1")
+    Server.load_crossword(server)
+    assert Server.guess_word(server, {"3", :across}, "an") == :ok
+  end
+
 end

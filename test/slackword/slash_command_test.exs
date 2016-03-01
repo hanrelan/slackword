@@ -45,6 +45,21 @@ defmodule Slackword.SlashCommandTest do
     refute conn.assigns[:server] == nil
   end
 
+  test "cannot guess without a crossword" do
+    conn = create_conn(text: "1a cat", channel_id: "channel2")
+    assert conn.resp_body == "You need to start a new crossword first"
+  end
+
+  test "old crosswords are loaded if the server is stopped" do
+    create_conn(text: "new", channel_id: "channel3")
+    conn = create_conn(text: "1a cat", channel_id: "channel3")
+    Slackword.Server.stop(conn.assigns[:server])
+    conn = create_conn(text: "1a cat", channel_id: "channel3")
+    assert conn.state == :sent
+    {:ok, response} = Poison.Parser.parse(conn.resp_body)
+    assert Map.has_key?(response, "attachments")
+  end
+
   defp create_conn(params \\ %{}) do
     merged_map = Dict.merge(%{token: @token, text: "test", team_id: "team", channel_id: "channel"}, params)
     conn = conn(:post, "/cw", merged_map)

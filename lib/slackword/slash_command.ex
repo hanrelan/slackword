@@ -59,7 +59,10 @@ defmodule Slackword.SlashCommand do
       channel_id = conn.assigns[:channel_id]
       crossword_id = Database.get_game_id(channel_id)
       server = Registry.find_or_create(Slackword.Registry, {channel_id, crossword_id})
-      conn |> assign(:crossword_id, crossword_id) |> assign(:server, server)
+      case Slackword.Server.load_crossword(server) do
+        :ok -> conn |> assign(:crossword_id, crossword_id) |> assign(:server, server)
+        {:error, :not_found} -> conn |> send_resp(200, "You need to start a new crossword first") |> halt
+      end
     else
       conn
     end
@@ -67,7 +70,7 @@ defmodule Slackword.SlashCommand do
 
   defp set_server_for_command?(command) do
     cond do
-      command in [] -> true
+      command in ["show"] -> true
       Slackword.StringHelper.is_guess?(command) -> true
       true -> false
     end

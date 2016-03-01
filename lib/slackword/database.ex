@@ -21,6 +21,18 @@ defmodule Slackword.Database do
     end)
   end
 
+  def save_crossword(id, crossword) do
+    Agent.update(__MODULE__, fn(cowdb) ->
+      :cowdb.put(cowdb, id, crossword)
+      cowdb
+    end)
+  end
+
+  def load_crossword(id) do
+    cowdb = Agent.get(__MODULE__, &(&1))
+    extract_value(:cowdb.get(cowdb, id))
+  end
+
   def drop do
     Agent.update(__MODULE__, fn(cowdb) -> 
       :cowdb.drop_db(cowdb) 
