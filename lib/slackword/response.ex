@@ -48,6 +48,17 @@ defmodule Slackword.Response do
     end
   end
 
+  def handle_command("load", conn) do
+    argument = conn.assigns[:arguments] |> to_string
+    crossword_id = argument |> Integer.parse
+    case crossword_id do
+      :error -> "Couldn't parse the crossword id #{argument}"
+      {id, _} -> 
+        Database.set_game_id(conn.assigns[:channel_id], id)
+        %{response_type: "in_channel", text: "Loaded crossword ##{id}"}
+    end
+  end
+
   def handle_command(cmd, conn) do
     parsed_guess = Slackword.StringHelper.parse_guess(cmd)
     if parsed_guess != nil do

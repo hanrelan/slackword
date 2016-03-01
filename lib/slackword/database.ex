@@ -21,6 +21,13 @@ defmodule Slackword.Database do
     end)
   end
 
+  def set_game_id(channel_id, id) do
+    Agent.update(__MODULE__, fn(cowdb) ->
+      :cowdb.put(cowdb, channel_id, id)
+      cowdb
+    end)
+  end
+
   def save_crossword(id, crossword) do
     Agent.update(__MODULE__, fn(cowdb) ->
       :cowdb.put(cowdb, id, crossword)
