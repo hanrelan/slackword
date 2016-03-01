@@ -60,7 +60,7 @@ defmodule Slackword.Response do
     crossword_id = conn.assigns[:crossword_id]
     {:ok, crossword} = Server.get_crossword(server)
     if ActiveCrossword.solved?(crossword) do
-      options = Dict.merge(options, pretext: "SOLVED!!!")
+      options = Dict.merge(options, pretext: "YOU DID IT!!!")
     end
     png = ActiveCrossword.render(crossword, 750, 750)
     filename = png_filename(channel_id, crossword_id, crossword)
