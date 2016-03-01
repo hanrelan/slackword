@@ -44,6 +44,8 @@ defmodule Slackword.Response do
     arguments = conn.assigns[:arguments]
     guess = Enum.join(arguments, "") |> String.replace("_", " ")
     case Server.guess_word(server, clue_idx, guess) do
+      {:error, :invalid_word} ->
+        "That's not one of the clues in this crossword"
       {:error, {:too_long, word_length, guess_length}} -> 
       # TODO(rohan): Properly pluralize
         %{response_type: "in_channel", text: "\"#{guess}\" is #{guess_length - word_length} letters too long"}
