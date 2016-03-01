@@ -68,6 +68,7 @@ defmodule Slackword.SlashCommand do
   defp set_server_for_command?(command) do
     cond do
       command in [] -> true
+      Slackword.StringHelper.is_guess?(command) -> true
       true -> false
     end
   end

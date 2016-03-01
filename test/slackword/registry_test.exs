@@ -10,7 +10,7 @@ defmodule Slackword.RegistryTest do
 
   test "spawns a server if it doesn't exist", %{registry: registry} do
     server = Registry.find_or_create(registry, "1")
-    assert match? {:ok, _crossword}, Server.new_crossword(server, Timex.Date.now)
+    assert Server.new_crossword(server, Timex.Date.now) == :ok
   end
 
   test "returns an existing server if it exists", %{registry: registry} do

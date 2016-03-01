@@ -68,7 +68,8 @@ defmodule Slackword.Crossword do
       :egd.line(image, {x + w, y + @padding}, {x + w, y + h - @padding}, @clue_color)
     end)
     all_clues = Enum.concat([["ACROSS"], Enum.map(clues_across, &Clue.render(&1)), 
-                   ["DOWN"], Enum.map(clues_down, &Clue.render(&1))])
+                   [" "], ["DOWN"], Enum.map(clues_down, &Clue.render(&1))])
+    # TODO(rohan): Deal with the situation where all the clues don't render
     {image, []} = Enum.reduce(columns, {image, all_clues}, fn({_x, y, _w, _h} = column, {image, clues_remaining}) ->
       render_into_column(image, clues_remaining, column, y + @padding)
     end)

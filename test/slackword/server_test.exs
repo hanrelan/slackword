@@ -10,7 +10,7 @@ defmodule Slackword.ServerTest do
   end
 
   test "starting a new crossword should return ok with the crossword", %{server: server} do
-    assert match? {:ok, _}, Server.new_crossword(server, Date.now)
+    assert :ok == Server.new_crossword(server, Date.now)
   end
 
   test "starting a new crossword when a crossword has been started should fail", %{server: server} do

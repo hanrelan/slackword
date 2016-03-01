@@ -1,5 +1,19 @@
 defmodule Slackword.StringHelper do
 
+  def is_guess?(text) do
+    parse_guess(text) != nil
+  end
+
+  def parse_guess(text) do
+    captures = Regex.named_captures(~r/(?<number>\d+)(?<direction>a|d)$/i, text)
+    if captures == nil do
+      nil
+    else
+      direction = if (captures["direction"] == "a") or (captures["direction"] == "A"), do: :across, else: :down
+      {captures["number"], direction}
+    end
+  end
+
   def wrap_to_lines(text, line_width, letter_width) do
     words = String.split(text, " ")
     wrap_words(words, [], line_width, [], line_width, letter_width)

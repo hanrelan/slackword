@@ -55,7 +55,7 @@ defmodule Slackword.Server do
 
   def handle_call({:new_crossword, %Timex.DateTime{} = date}, _from, state) do
     crossword = ActiveCrossword.new(Slackword.Crossword.new(date))
-    {:reply, {:ok, crossword}, Map.put(state, :crossword, crossword)} 
+    {:reply, :ok, Map.put(state, :crossword, crossword)} 
   end
 
   def handle_call({:get_crossword}, _from, state) do
