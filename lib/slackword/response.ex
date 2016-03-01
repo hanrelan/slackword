@@ -42,7 +42,7 @@ defmodule Slackword.Response do
   defp handle_guess(clue_idx, conn) do
     server = conn.assigns[:server]
     arguments = conn.assigns[:arguments]
-    guess = Enum.join(arguments, "")
+    guess = Enum.join(arguments, "") |> String.replace("_", " ")
     case Server.guess_word(server, clue_idx, guess) do
       {:error, {:too_long, word_length, guess_length}} -> 
       # TODO(rohan): Properly pluralize
@@ -63,10 +63,10 @@ defmodule Slackword.Response do
     %{response_type: "in_channel", 
       attachments: [
         %{image_url: image_url(conn, filename),
-          fallback: "A crossword",
-          title: "New crossword",
+          fallback: "Crossword",
+          title: "Crossword",
           title_link: image_url(conn, filename)
-        }
+         }
       ]
      }
   end
