@@ -14,11 +14,21 @@ defmodule Slackword.Response do
     crossword_id = Database.new_game_id(channel_id)
     server = Registry.find_or_create(Slackword.Registry, {channel_id, crossword_id})
     :ok = Server.new_crossword(server, date)
-    render_crossword(server, conn)
+    {:ok, crossword} = Server.get_crossword(server)
+    options = %{pretext: crossword.crossword.metadata.title,
+                title: "New Crossword ##{crossword_id}"}
+    render_crossword(crossword, conn, options)
   end
 
   def handle_command("help", _conn) do
-    "help -> returns this message"
+    ["help -> returns this message",
+     "new -> starts a new crossword from today's LA Times",
+     "new YYYY-MM-DD -> starts a new crossword from particular date's LA Times",
+     "1a <guess> -> fills in a guess for 1 across",
+     "21d <guess> -> fills in a guess for 21 down",
+     "show -> shows the current crossword",
+     "show errors -> shows any errors",
+     "show solution -> show the solution to the current crossword"] |> Enum.join("\n")
   end
 
   def handle_command("test", _conn) do
@@ -27,7 +37,15 @@ defmodule Slackword.Response do
 
   def handle_command("show", conn) do
     server = conn.assigns[:server]
-    render_crossword(server, conn)
+    argument = conn.assigns[:arguments] |> to_string
+    {:ok, crossword} = Server.get_crossword(server)
+    case argument do
+      "" -> render_crossword(crossword, conn)
+      "errors" -> render_crossword(crossword, conn, %{title: "Crossword ##{conn.assigns[:crossword_id]} Errors"}, 
+                                   &ActiveCrossword.render_errors(&1, false, &2, &3)) 
+      "solution" -> render_crossword(crossword, conn, %{title: "Crossword ##{conn.assigns[:crossword_id]} Solution"}, 
+                                   &ActiveCrossword.render_errors(&1, true, &2, &3)) 
+    end
   end
 
   def handle_command(cmd, conn) do
@@ -51,24 +69,30 @@ defmodule Slackword.Response do
         %{response_type: "in_channel", text: "\"#{guess}\" is #{guess_length - word_length} letters too long"}
       {:error, {:too_short, word_length, guess_length}} -> 
         %{response_type: "in_channel", text: "\"#{guess}\" is #{word_length - guess_length} letters too short"}
-      :ok -> render_crossword(server, conn)
+      :ok -> 
+        {:ok, crossword} = Server.get_crossword(server)
+        options = %{}
+        if ActiveCrossword.solved?(crossword) do
+          options = %{pretext: "YOU DID IT!!!"}
+        end
+        render_crossword(crossword, conn, options)
     end
   end
 
-  defp render_crossword(server, conn, options \\ []) do
+  defp render_crossword(crossword, conn, options \\ [], render_fun \\ nil) do
     channel_id = conn.assigns[:channel_id]
     crossword_id = conn.assigns[:crossword_id]
-    {:ok, crossword} = Server.get_crossword(server)
-    if ActiveCrossword.solved?(crossword) do
-      options = Dict.merge(options, pretext: "YOU DID IT!!!")
+    png = if render_fun == nil do
+      ActiveCrossword.render(crossword, 750, 750)
+    else
+      render_fun.(crossword, 750, 750)
     end
-    png = ActiveCrossword.render(crossword, 750, 750)
     filename = png_filename(channel_id, crossword_id, crossword)
     :egd.save(png, Path.join([@public_images_dir, filename]))
     attachment = 
       Dict.merge(%{image_url: image_url(conn, filename),
         fallback: "Crossword #{crossword_id}",
-        title: "Crossword #{crossword_id}",
+        title: "Crossword ##{crossword_id}",
         title_link: image_url(conn, filename),
         }, options)
     %{response_type: "in_channel", 
