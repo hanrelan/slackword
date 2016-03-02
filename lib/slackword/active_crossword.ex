@@ -20,7 +20,7 @@ defmodule Slackword.ActiveCrossword do
 
   defstruct crossword: %Crossword{}, answers: %Grid{}, id: 0
 
-  @letter_font_path Path.join(["privstatic", "fonts", "osx", "Terminus16.wingsfont"])
+  @letter_font_path Slackword.FontHelper.font_path("Terminus16.wingsfont")
 
   def new(%Crossword{grid: grid} = crossword) do
     %ActiveCrossword{crossword: crossword, answers: %Grid{dimensions: grid.dimensions}}
