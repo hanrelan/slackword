@@ -22,4 +22,18 @@ defmodule Slackword.DatabaseTest do
     assert Database.get_game_id("asdf") == 2 
   end
 
+  test "set_game_id sets the id" do
+    assert Database.new_game_id("asdf") == 1
+    assert Database.new_game_id("asdf") == 2
+    Database.set_game_id("asdf", 1)
+    assert Database.get_game_id("asdf") == 1
+  end
+
+  test "new_game_id increments the id to a not used id" do
+    assert Database.new_game_id("asdf") == 1
+    assert Database.new_game_id("asdf") == 2
+    Database.set_game_id("asdf", 1)
+    assert Database.new_game_id("asdf") == 3
+  end
+
 end

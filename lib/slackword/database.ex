@@ -11,11 +11,13 @@ defmodule Slackword.Database do
   end
 
   def new_game_id(channel_id) do
+    counter_id = "#{channel_id}:counter"
     Agent.get_and_update(__MODULE__, fn(cowdb) ->
-      new_id = case extract_value(:cowdb.get(cowdb, channel_id)) do
+      new_id = case extract_value(:cowdb.get(cowdb, counter_id)) do
         :not_found -> 1
         current_id -> current_id + 1
       end
+      :cowdb.put(cowdb, counter_id, new_id)
       :cowdb.put(cowdb, channel_id, new_id)
       {new_id, cowdb}
     end)

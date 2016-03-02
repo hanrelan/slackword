@@ -4,7 +4,7 @@ defmodule Slackword.SlashCommand do
   use Plug.Router
 
   plug Plug.Parsers, parsers: [:urlencoded]
-  plug :validate_token
+  #plug :validate_token
   plug :set_channel_id
   plug :set_command
   plug :set_server

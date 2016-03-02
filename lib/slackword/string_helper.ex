@@ -14,6 +14,7 @@ defmodule Slackword.StringHelper do
     end
   end
 
+  # TODO(rohan): handle the case where the word_width > line_width
   def wrap_to_lines(text, line_width, letter_width) do
     words = String.split(text, " ")
     wrap_words(words, [], line_width, [], line_width, letter_width)
