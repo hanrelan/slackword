@@ -3,7 +3,7 @@ defmodule Slackword.Mixfile do
 
   def project do
     [app: :slackword,
-     version: "0.0.1",
+     version: "0.7.0",
      elixir: "~> 1.2",
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
@@ -16,7 +16,8 @@ defmodule Slackword.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :tzdata, :httpotion, :cowboy, :plug],
+    [applications: [:logger, :tzdata, :httpotion, :cowboy, :plug,
+                    :sweet_xml, :timex, :html_entities, :cowdb, :poison],
      mod: {Slackword, []}
     ]
   end
@@ -40,7 +41,8 @@ defmodule Slackword.Mixfile do
       {:sweet_xml, "~> 0.5.0"},
       {:html_entities, "~> 0.2"},
       {:poison, "~> 2.0"},
-      {:cowdb, github: "refuge/cowdb", tag: :master}
+      {:cowdb, github: "refuge/cowdb", tag: :master},
+      {:exrm, "~> 1.0.2"}
     ]
   end
 
