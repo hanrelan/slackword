@@ -28,7 +28,8 @@ defmodule Slackword.Response do
      "21d <guess> -> fills in a guess for 21 down",
      "show -> shows the current crossword",
      "show errors -> shows any errors",
-     "show solution -> show the solution to the current crossword"] |> Enum.join("\n")
+     "show solution -> show the solution to the current crossword",
+     "info -> show the current crossword's title and author"] |> Enum.join("\n")
   end
 
   def handle_command("test", _conn) do
@@ -57,6 +58,14 @@ defmodule Slackword.Response do
         Database.set_game_id(conn.assigns[:channel_id], id)
         %{response_type: "in_channel", text: "Loaded crossword ##{id}"}
     end
+  end
+
+  def handle_command("info", conn) do
+    server = conn.assigns[:server]
+    {:ok, crossword} = Server.get_crossword(server)
+    metadata = crossword.crossword.metadata 
+    info = "\n#{metadata.title}\nCreated by #{metadata.creator}\n#{metadata.description}"
+    %{response_type: "in_channel", text: info}
   end
 
   def handle_command(cmd, conn) do
