@@ -84,7 +84,7 @@ defmodule Slackword.Response do
         {:ok, crossword} = Server.get_crossword(server)
         options = %{}
         if ActiveCrossword.solved?(crossword) do
-          options = %{pretext: "YOU DID IT!!!"}
+          options = %{pretext: "SOLVED!!! :boomgif:"}
         end
         render_crossword(crossword, conn, options)
     end
@@ -116,8 +116,7 @@ defmodule Slackword.Response do
   end
 
   defp image_url(conn, filename) do
-    # TODO(rohan): the port should come from the conn
-    "http://#{conn.host}:8000/images/#{filename}"
+    "http://#{conn.host}:#{conn.port}/images/#{filename}"
   end
 
 end
