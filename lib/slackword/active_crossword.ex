@@ -7,7 +7,8 @@ defmodule Slackword.ActiveCrossword.Answer do
   @letter_color_incorrect :egd.color({255, 0, 0})
   @letter_color_tentative :egd.color({128, 128, 128})
 
-  def render_to_image(%Answer{letter: letter, tentative: tentative} = answer, image, %{box_width: box_width, letter_font: letter_font}, incorrect \\ false) do
+  def render_to_image(%Answer{letter: letter} = answer, image, %{box_width: box_width, letter_font: letter_font}, incorrect \\ false) do
+    tentative = Map.get(answer, :tentative, false)
     letter_color = cond do
       incorrect -> @letter_color_incorrect
       tentative -> @letter_color_tentative
