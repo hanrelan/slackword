@@ -1,13 +1,18 @@
 defmodule Slackword.ActiveCrossword.Answer do
   alias Slackword.ActiveCrossword.Answer
   alias Slackword.GridSquare
-  defstruct letter: "", x: 0, y: 0
+  defstruct letter: "", x: 0, y: 0, tentative: false
 
   @letter_color :egd.color(:black)
   @letter_color_incorrect :egd.color({255, 0, 0})
+  @letter_color_tentative :egd.color({128, 128, 128})
 
-  def render_to_image(%Answer{letter: letter} = answer, image, %{box_width: box_width, letter_font: letter_font}, incorrect \\ false) do
-    letter_color = if incorrect, do: @letter_color_incorrect, else: @letter_color
+  def render_to_image(%Answer{letter: letter, tentative: tentative} = answer, image, %{box_width: box_width, letter_font: letter_font}, incorrect \\ false) do
+    letter_color = cond do
+      incorrect -> @letter_color_incorrect
+      tentative -> @letter_color_tentative
+      true -> @letter_color
+    end
     GridSquare.render_letter_to_image(image, {answer.x, answer.y}, letter, box_width, %{letter_font: letter_font, letter_color: letter_color})
   end
 
@@ -27,7 +32,12 @@ defmodule Slackword.ActiveCrossword do
   end
 
   def add_answer(%ActiveCrossword{answers: answers, id: id} = active_crossword, %Answer{} = answer) do
-    answers = Grid.add(answers, answer.x, answer.y, answer) 
+    old_answer = get_answer(active_crossword, answer.x, answer.y)
+    answers = if (old_answer.letter == answer.letter) and answer.tentative do
+      answers
+    else
+      Grid.add(answers, answer.x, answer.y, answer) 
+    end
     %{active_crossword | answers: answers, id: id + 1}
   end
 
@@ -41,6 +51,8 @@ defmodule Slackword.ActiveCrossword do
   end
 
   def guess_word(%ActiveCrossword{crossword: crossword} = active_crossword, clue_idx, guess) do
+    tentative = (String.last(guess) == "?")
+    guess = String.replace_trailing(guess, "?", "")
     guess_length = String.length(guess)
     word = Crossword.get_word(crossword, clue_idx) 
     word_length = Word.length(word)
@@ -52,7 +64,7 @@ defmodule Slackword.ActiveCrossword do
         guess = String.upcase(guess) |> String.codepoints
         indexed_guesses = Stream.zip(Word.indexes(word), guess)
         active_crossword = Enum.reduce(indexed_guesses, active_crossword, fn({{x, y}, letter}, a_c) -> 
-          ActiveCrossword.add_answer(a_c, %Answer{x: x, y: y, letter: letter})
+          ActiveCrossword.add_answer(a_c, %Answer{x: x, y: y, letter: letter, tentative: tentative})
         end)
         {:ok, active_crossword}
     end

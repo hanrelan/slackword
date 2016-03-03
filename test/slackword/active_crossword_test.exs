@@ -62,7 +62,7 @@ defmodule Slackword.ActiveCrosswordTest do
     assert ActiveCrossword.guess_word(active_crossword, {"3", :across}, "a") == {:error, {:too_short, 2, 1}}
   end
 
-  test "guessing work fails if not a valid word", %{active_crossword: active_crossword} do
+  test "guessing word fails if not a valid word", %{active_crossword: active_crossword} do
     assert ActiveCrossword.guess_word(active_crossword, {"3", :down}, "an") == {:error, :invalid_word}
   end
 
@@ -70,6 +70,37 @@ defmodule Slackword.ActiveCrosswordTest do
     {:ok, active_crossword} = ActiveCrossword.guess_word(active_crossword, {"3", :across}, "an")
     assert ActiveCrossword.get_answer(active_crossword, 1, 2).letter == "A"
     assert ActiveCrossword.get_answer(active_crossword, 2, 2).letter == "N"
+  end
+
+  test "guessing word with ? makes the answers tentative", %{active_crossword: active_crossword} do
+    {:ok, active_crossword} = ActiveCrossword.guess_word(active_crossword, {"3", :across}, "an?")
+    answer = ActiveCrossword.get_answer(active_crossword, 1, 2)
+    assert answer.letter == "A"
+    assert answer.tentative
+    answer = ActiveCrossword.get_answer(active_crossword, 2, 2)
+    assert answer.letter == "N"
+    assert answer.tentative
+  end
+
+  test "guessing word non-tentative after guessing tentative makes the answer not tentative", %{active_crossword: active_crossword} do
+    {:ok, active_crossword} = ActiveCrossword.guess_word(active_crossword, {"3", :across}, "an?")
+    {:ok, active_crossword} = ActiveCrossword.guess_word(active_crossword, {"3", :across}, "an")
+    refute ActiveCrossword.get_answer(active_crossword, 1, 2).tentative
+    refute ActiveCrossword.get_answer(active_crossword, 2, 2).tentative
+  end
+
+  test "tentative guesses do not overwrite non tentative guesses", %{active_crossword: active_crossword} do
+    {:ok, active_crossword} = ActiveCrossword.guess_word(active_crossword, {"2", :down}, "ant")
+    {:ok, active_crossword} = ActiveCrossword.guess_word(active_crossword, {"3", :across}, "an?")
+    assert ActiveCrossword.get_answer(active_crossword, 1, 2).tentative
+    refute ActiveCrossword.get_answer(active_crossword, 2, 2).tentative
+  end
+
+  test "non tentative guesses overwrite tentative guesses", %{active_crossword: active_crossword} do
+    {:ok, active_crossword} = ActiveCrossword.guess_word(active_crossword, {"3", :across}, "an?")
+    {:ok, active_crossword} = ActiveCrossword.guess_word(active_crossword, {"2", :down}, "ant")
+    assert ActiveCrossword.get_answer(active_crossword, 1, 2).tentative
+    refute ActiveCrossword.get_answer(active_crossword, 2, 2).tentative
   end
 
   test "adding an answer increments the id", %{active_crossword: active_crossword} do
