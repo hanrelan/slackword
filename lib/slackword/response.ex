@@ -91,11 +91,7 @@ defmodule Slackword.Response do
         %{response_type: "in_channel", text: "\"#{guess}\" is #{word_length - guess_length} letters too short"}
       :ok -> 
         {:ok, crossword} = Server.get_crossword(server)
-        options = %{}
-        if ActiveCrossword.solved?(crossword) do
-          options = %{pretext: "SOLVED!!! :boomgif:"}
-        end
-        render_crossword(crossword, conn, options)
+        render_crossword(crossword, conn)
     end
   end
 
@@ -106,6 +102,9 @@ defmodule Slackword.Response do
       ActiveCrossword.render(crossword, 750, 750)
     else
       render_fun.(crossword, 750, 750)
+    end
+    if ActiveCrossword.solved?(crossword) do
+      options = Dict.merge(%{pretext: "SOLVED!!! :boomgif:"}, options)
     end
     filename = png_filename(channel_id, crossword_id, crossword)
     :egd.save(png, Path.join([@public_images_dir, filename]))
