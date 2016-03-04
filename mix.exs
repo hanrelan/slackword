@@ -17,7 +17,7 @@ defmodule Slackword.Mixfile do
   # Type "mix help compile.app" for more information
   def application do
     [applications: [:logger, :tzdata, :httpotion, :cowboy, :plug,
-                    :sweet_xml, :timex, :html_entities, :cowdb, :poison],
+                    :sweet_xml, :timex, :cowdb, :poison],
      mod: {Slackword, []}
     ]
   end
@@ -39,7 +39,6 @@ defmodule Slackword.Mixfile do
       {:httpotion, "~> 2.1.0"},
       {:timex, "~> 1.0.0"},
       {:sweet_xml, "~> 0.5.0"},
-      {:html_entities, "~> 0.2"},
       {:poison, "~> 2.0"},
       {:cowdb, github: "refuge/cowdb", tag: :master},
       {:exrm, "~> 1.0.2"}
