@@ -5,6 +5,7 @@ defmodule Slackword.SlashCommand do
 
   plug Plug.Parsers, parsers: [:urlencoded]
   #plug :validate_token
+  plug :set_host
   plug :set_channel_id
   plug :set_command
   plug :set_server
@@ -26,7 +27,7 @@ defmodule Slackword.SlashCommand do
   end
 
   defp handle_command(conn) do
-    response = Response.handle_command(conn.assigns[:command], conn)
+    response = Response.handle_command(conn.assigns[:command], conn.assigns)
     content_type = "text/plain"
     if is_map(response) do
       response = Poison.Encoder.encode(response, [])
@@ -74,6 +75,10 @@ defmodule Slackword.SlashCommand do
       Slackword.StringHelper.is_guess?(command) -> true
       true -> false
     end
+  end
+
+  defp set_host(conn, _) do
+    conn |> assign(:host, "#{conn.host}:#{conn.port}")
   end
 
 end
