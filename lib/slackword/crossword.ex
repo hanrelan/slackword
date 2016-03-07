@@ -12,7 +12,7 @@ defmodule Slackword.Crossword do
 
   @downloader Application.get_env(:slackword, :downloader)
   @clue_color :egd.color(:black)
-  @clue_font_path Slackword.FontHelper.font_path("fixed6x12.wingsfont")
+  @clue_font_path Slackword.FontHelper.font_path("fixed7x14.wingsfont")
   @padding 5
 
 

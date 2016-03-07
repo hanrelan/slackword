@@ -100,9 +100,9 @@ defmodule Slackword.Response do
     channel_id = params[:channel_id]
     crossword_id = params[:crossword_id]
     png = if render_fun == nil do
-      ActiveCrossword.render(crossword, 750, 750)
+      ActiveCrossword.render(crossword, 800, 800)
     else
-      render_fun.(crossword, 750, 750)
+      render_fun.(crossword, 800, 800)
     end
     if ActiveCrossword.solved?(crossword) do
       options = Dict.merge(%{pretext: "SOLVED!!! :boomgif:"}, options)
