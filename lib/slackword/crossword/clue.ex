@@ -8,7 +8,8 @@ defmodule Slackword.Crossword.Clue do
     %Clue{format: format, number: number, word: word, direction: direction, text: text} 
   end
 
-  def render(%Clue{text: text, number: number, format: format}) do
+  def render(%Clue{text: text, number: number, format: format, word: word}) do
+    format = if format == "", do: Word.length(word), else: format
     "#{number}: #{text} (#{format})"
   end
 
