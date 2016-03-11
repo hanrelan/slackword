@@ -78,7 +78,9 @@ defmodule Slackword.ActiveCrossword do
     Grid.reduce(answers, base_image, fn({_x, _y, answer=%Answer{}}, image) ->
       Answer.render_to_image(answer, image, %{box_width: box_width, letter_font: letter_font})
     end)
-    :egd.render(base_image, :png)
+    png = :egd.render(base_image, :png)
+    :egd.destroy(base_image)
+    png
   end
 
   def render_errors(%ActiveCrossword{crossword: crossword, answers: answers} = active_crossword, show_solutions \\ false, output_width \\ 800, output_height \\ 800) do

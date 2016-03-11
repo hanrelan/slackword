@@ -44,6 +44,7 @@ defmodule Slackword.Crossword do
     end
   end
 
+  # The caller must destroy the image when done
   def render(%Crossword{grid: grid} = crossword, output_width \\ 800, output_height \\ 800) do
     image = :egd.create(output_width, output_height)
     number_font = :egd_font.load(Path.join([:code.priv_dir(:percept), "fonts", "6x11_latin1.wingsfont"]))
