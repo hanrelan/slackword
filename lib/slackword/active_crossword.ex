@@ -100,7 +100,9 @@ defmodule Slackword.ActiveCrossword do
           Answer.render_to_image(answer, image, settings, true)
       end 
     end)
-    :egd.render(base_image, :png)
+    png = :egd.render(base_image, :png)
+    :egd.destroy(base_image)
+    png
   end
 
   def solved?(%ActiveCrossword{crossword: crossword} = active_crossword) do
