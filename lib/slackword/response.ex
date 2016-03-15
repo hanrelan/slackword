@@ -44,9 +44,10 @@ defmodule Slackword.Response do
     case argument do
       "" -> render_crossword(crossword, params)
       "errors" -> render_crossword(crossword, params, %{title: "Crossword ##{params[:crossword_id]} Errors"}, 
-                                   &ActiveCrossword.render_errors(&1, false, &2, &3)) 
+                                   &ActiveCrossword.render_errors(&1, false, &2, &3), "errors") 
       "solution" -> render_crossword(crossword, params, %{title: "Crossword ##{params[:crossword_id]} Solution"}, 
-                                   &ActiveCrossword.render_errors(&1, true, &2, &3)) 
+                                   &ActiveCrossword.render_errors(&1, true, &2, &3), "solution") 
+      other -> "I don't know how to show \"#{other}\". Try /cw help instead"
     end
   end
 
@@ -96,7 +97,7 @@ defmodule Slackword.Response do
     end
   end
 
-  defp render_crossword(crossword, params, options \\ [], render_fun \\ nil) do
+  defp render_crossword(crossword, params, options \\ [], render_fun \\ nil, filename_suffix \\ nil) do
     channel_id = params[:channel_id]
     crossword_id = params[:crossword_id]
     png = if render_fun == nil do
@@ -107,7 +108,7 @@ defmodule Slackword.Response do
     if ActiveCrossword.solved?(crossword) do
       options = Dict.merge(%{pretext: "SOLVED!!! :boomgif:"}, options)
     end
-    filename = png_filename(channel_id, crossword_id, crossword)
+    filename = png_filename(channel_id, crossword_id, crossword, filename_suffix)
     :egd.save(png, Path.join([@public_images_dir, filename]))
     attachment = 
       Dict.merge(%{image_url: image_url(params, filename),
@@ -120,8 +121,12 @@ defmodule Slackword.Response do
      }
   end
 
-  defp png_filename(channel_id, crossword_id, crossword) do
-    "#{channel_id}_#{crossword_id}_#{crossword.id}.png"
+  defp png_filename(channel_id, crossword_id, crossword, filename_suffix) do
+    if filename_suffix do
+      "#{channel_id}_#{crossword_id}_#{crossword.id}_#{filename_suffix}.png"
+    else
+      "#{channel_id}_#{crossword_id}_#{crossword.id}.png"
+    end
   end
 
   defp image_url(params, filename) do
