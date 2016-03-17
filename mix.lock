@@ -4,6 +4,7 @@
   "cbt": {:git, "https://github.com/benoitc/cbt.git", "3b3754c593ded5cac845cca9b9db7f34f05e881d", [tag: "1.2.2"]},
   "certifi": {:hex, :certifi, "0.3.0"},
   "cf": {:hex, :cf, "0.2.1"},
+  "codepagex": {:hex, :codepagex, "0.1.2"},
   "combine": {:hex, :combine, "0.7.0"},
   "conform": {:hex, :conform, "0.16.0"},
   "coverex": {:hex, :coverex, "1.4.8"},

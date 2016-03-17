@@ -20,7 +20,7 @@ defmodule Slackword.Crossword do
 
   def new(%Timex.DateTime{} = date) do
     # TODO: handle the case where the downloader fails
-    @downloader.get(date) |> Slackword.Crossword.Parser.parse
+    @downloader.get(date) |> Slackword.Crossword.Parsers.XmlParser.parse
   end
 
   def get(%Crossword{grid: grid}, x, y) do

@@ -40,6 +40,7 @@ defmodule Slackword.Mixfile do
       {:timex, "~> 1.0.0"},
       {:sweet_xml, "~> 0.5.0"},
       {:poison, "~> 2.0"},
+      {:codepagex, "~> 0.1.2"},
       {:cowdb, github: "refuge/cowdb", tag: :master},
       {:exrm, "~> 1.0.2"}
     ]
