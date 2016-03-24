@@ -5,7 +5,7 @@ defmodule TestHelper do
   @static_dir Application.get_env(:slackword, :private_static_dir)
 
   def test_crossword do
-    Slackword.Crossword.new(Timex.Date.now)
+    Slackword.Crossword.new(Timex.Date.now, Slackword.Crossword.Downloaders.TestDownloader)
   end
 
   def test_crossword_png do

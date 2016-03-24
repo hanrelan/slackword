@@ -8,9 +8,8 @@ end
 
 defmodule Slackword.Crossword do
   alias Slackword.{Crossword, Grid}
-  alias Slackword.Crossword.{Metadata, Cell, Clue}
+  alias Slackword.Crossword.{Metadata, Cell, Clue, Downloader}
 
-  @downloader Application.get_env(:slackword, :downloader)
   @clue_color :egd.color(:black)
   @clue_font_path Slackword.FontHelper.font_path("fixed7x14.wingsfont")
   @padding 5
@@ -18,9 +17,9 @@ defmodule Slackword.Crossword do
 
   defstruct metadata: %Metadata{}, grid: %Grid{}, clues: %{}, clues_across: [], clues_down: []
 
-  def new(%Timex.DateTime{} = date) do
+  def new(%Timex.DateTime{} = date, downloader \\ Slackword.Crossword.Downloaders.LatDownloader) do
     # TODO: handle the case where the downloader fails
-    @downloader.get(date) |> Slackword.Crossword.Parsers.XmlParser.parse
+    Downloader.get(date, downloader) |> Slackword.Crossword.Parsers.XmlParser.parse
   end
 
   def get(%Crossword{grid: grid}, x, y) do

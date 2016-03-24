@@ -1,20 +1,35 @@
 defmodule Slackword.Response do
   @public_images_dir Path.join([Application.get_env(:slackword, :public_static_dir), "images"])
+  @default_downloader Application.get_env :slackword, :default_downloader
+  @downloaders %{"latimes" => Slackword.Crossword.Downloaders.LatDownloader}
 
   alias Slackword.{ActiveCrossword, Database, Registry, Server}
 
   def handle_command("new", params) do
     channel_id = params[:channel_id]
     args = params[:arguments]
-    date = case args do
-      [] -> Timex.Date.now
-      # TODO(rohan): Handle the case where it didn't parse properly
-      [date_string] -> Timex.DateFormat.parse!(date_string, "{YYYY}-{M}-{D}")
+    new_args = Enum.map(args, fn arg ->
+      case Timex.DateFormat.parse(arg, "{YYYY}-{M}-{D}") do
+        {:ok, date} -> date
+        {:error, _} ->
+          Map.get(@downloaders, arg, arg)
+      end
+    end)
+    {date, downloader} = case new_args do
+      [] -> {Timex.Date.now, @default_downloader}
+      [%Timex.DateTime{}=date] -> {date, @default_downloader}
+      [downloader] when is_atom(downloader) -> {Timex.Date.now, downloader}
+      [%Timex.DateTime{}=date, downloader] when is_atom(downloader) -> {date, downloader}
+      [downloader, %Timex.DateTime{}=date] when is_atom(downloader) -> {date, downloader}
+      # TODO(rohan): Return a nice error msg here
+      other -> 
+        raise "Couldn't parse new command #{other}"
+        {nil, nil}
     end
     crossword_id = Database.new_game_id(channel_id)
     params = Map.put(params, :crossword_id, crossword_id)
     server = Registry.find_or_create(Slackword.Registry, {channel_id, crossword_id})
-    :ok = Server.new_crossword(server, date)
+    :ok = Server.new_crossword(server, date, downloader)
     {:ok, crossword} = Server.get_crossword(server)
     options = %{pretext: crossword.crossword.metadata.title,
                 title: "New Crossword ##{crossword_id}"}

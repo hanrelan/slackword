@@ -3,6 +3,7 @@ defmodule Slackword.ServerTest do
   use Timex
 
   alias Slackword.Server
+  alias Slackword.Crossword.Downloaders.TestDownloader
 
   setup do
     {:ok, server} = Server.start_link("1")
@@ -10,12 +11,12 @@ defmodule Slackword.ServerTest do
   end
 
   test "starting a new crossword should return ok with the crossword", %{server: server} do
-    assert :ok == Server.new_crossword(server, Date.now)
+    assert :ok == Server.new_crossword(server, Date.now, TestDownloader)
   end
 
   test "starting a new crossword when a crossword has been started should fail", %{server: server} do
-    Server.new_crossword(server, Date.now)
-    assert Server.new_crossword(server, Date.now) == {:error, :already_exists}
+    Server.new_crossword(server, Date.now, TestDownloader)
+    assert Server.new_crossword(server, Date.now, TestDownloader) == {:error, :already_exists}
   end
 
   test "executing commands without a loaded crossword should fail", %{server: server} do
@@ -23,13 +24,13 @@ defmodule Slackword.ServerTest do
   end
 
   test "guess word", %{server: server} do
-    Server.new_crossword(server, Date.now)
+    Server.new_crossword(server, Date.now, TestDownloader)
     assert Server.guess_word(server, {"3", :across}, "ant") == {:error, {:too_long, 2, 3}}
     assert Server.guess_word(server, {"3", :across}, "an") == :ok
   end
 
   test "loading a crossword with the same id should restore original crossword", %{server: server} do
-    Server.new_crossword(server, Date.now)
+    Server.new_crossword(server, Date.now, TestDownloader)
     Server.stop(server)
     {:ok, server} = Server.start_link("1")
     Server.load_crossword(server)

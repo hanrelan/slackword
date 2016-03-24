@@ -27,7 +27,7 @@ use Mix.Config
 # Configuration from the imported file will override the ones defined
 # here (which is why it is important to import them last).
 #
-config :slackword, :downloader, Slackword.Crossword.Downloader
+config :slackword, :default_downloader, Slackword.Crossword.Downloaders.LatDownloader
 config :slackword, :private_static_dir, "privstatic"
 config :slackword, :font_dir, Path.join(["privstatic", "fonts"])
 config :slackword, :public_static_dir, "public"

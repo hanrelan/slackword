@@ -29,8 +29,8 @@ defmodule Slackword.Server do
     GenServer.start_link(__MODULE__, id, [])
   end
 
-  def new_crossword(server, %Timex.DateTime{} = date) do
-    GenServer.call(server, {:new_crossword, date})
+  def new_crossword(server, %Timex.DateTime{} = date, downloader) do
+    GenServer.call(server, {:new_crossword, date, downloader})
   end
 
   def get_crossword(server) do
@@ -59,12 +59,12 @@ defmodule Slackword.Server do
     {:ok, %{id: id}, @timeout}
   end
 
-  def handle_call({:new_crossword, _date}, _from, %{crossword: _crossword} = state) do
+  def handle_call({:new_crossword, _date, _downloader}, _from, %{crossword: _crossword} = state) do
     {:reply, {:error, :already_exists}, state, @timeout}
   end
 
-  def handle_call({:new_crossword, %Timex.DateTime{} = date}, _from, state) do
-    crossword = ActiveCrossword.new(Slackword.Crossword.new(date))
+  def handle_call({:new_crossword, %Timex.DateTime{} = date, downloader}, _from, state) do
+    crossword = ActiveCrossword.new(Slackword.Crossword.new(date, downloader))
     save_crossword(self())
     {:reply, :ok, Map.put(state, :crossword, crossword), @timeout} 
   end

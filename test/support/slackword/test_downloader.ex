@@ -1,12 +1,12 @@
-defmodule Slackword.Crossword.TestDownloader do
-  @static_dir Application.get_env(:slackword, :private_static_dir)
-  use Timex
+defmodule Slackword.Crossword.Downloaders.TestDownloader do
+  @behaviour Slackword.Crossword.Downloader
 
-  def get(%DateTime{} = _date) do
-    get_file("test_crossword.xml")
+  def get_url(_filename) do
+    raise "Can't retrieve from URL"
+    ""
   end
 
-  defp get_file(filename) do
-    File.read! "#{@static_dir}/#{filename}"
-  end
+  def save_dir(), do: ""
+
+  def get_filename(%Timex.DateTime{} = _date), do: "test_crossword.xml"
 end

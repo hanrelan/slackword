@@ -2,6 +2,7 @@ defmodule Slackword.RegistryTest do
   use ExUnit.Case, async: true
 
   alias Slackword.{Registry, Server}
+  alias Slackword.Crossword.Downloaders.TestDownloader
 
   setup context do
     {:ok, registry} = Registry.start_link(context.test)
@@ -10,7 +11,7 @@ defmodule Slackword.RegistryTest do
 
   test "spawns a server if it doesn't exist", %{registry: registry} do
     server = Registry.find_or_create(registry, "1")
-    assert Server.new_crossword(server, Timex.Date.now) == :ok
+    assert Server.new_crossword(server, Timex.Date.now, TestDownloader) == :ok
   end
 
   test "returns an existing server if it exists", %{registry: registry} do
