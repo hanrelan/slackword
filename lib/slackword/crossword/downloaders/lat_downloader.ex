@@ -2,7 +2,7 @@ defmodule Slackword.Crossword.Downloaders.LatDownloader do
   @behaviour Slackword.Crossword.Downloader
   use Timex
 
-  def get_url(filename) do
+  def get_url(_date, filename) do
     url = "http://cdn.games.arkadiumhosted.com/latimes/assets/DailyCrossword/#{filename}"
     response = HTTPotion.get url
     response.body

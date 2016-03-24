@@ -2,7 +2,7 @@ defmodule Slackword.Crossword.Downloader do
   @static_dir Application.get_env(:slackword, :private_static_dir)
   use Timex
 
-  @callback get_url(String.t) :: iodata
+  @callback get_url(DateTime.t, String.t) :: iodata
   @callback save_dir() :: String.t
   @callback get_filename(DateTime.t) :: String.t
 
@@ -11,7 +11,7 @@ defmodule Slackword.Crossword.Downloader do
     case get_file(downloader.save_dir(), filename) do
       {:ok, file} -> file
       {:error, _} -> 
-        new_file = downloader.get_url(filename)
+        new_file = downloader.get_url(date, filename)
         :ok = File.mkdir_p(Path.join([@static_dir, downloader.save_dir]))
         :ok = File.write(Path.join([@static_dir, downloader.save_dir, filename]), new_file)
         new_file

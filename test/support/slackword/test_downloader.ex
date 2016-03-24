@@ -1,7 +1,7 @@
 defmodule Slackword.Crossword.Downloaders.TestDownloader do
   @behaviour Slackword.Crossword.Downloader
 
-  def get_url(_filename) do
+  def get_url(_date, _filename) do
     raise "Can't retrieve from URL"
     ""
   end
