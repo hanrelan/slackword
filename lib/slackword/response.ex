@@ -1,7 +1,8 @@
 defmodule Slackword.Response do
   @public_images_dir Path.join([Application.get_env(:slackword, :public_static_dir), "images"])
   @default_downloader Application.get_env :slackword, :default_downloader
-  @downloaders %{"latimes" => Slackword.Crossword.Downloaders.LatDownloader}
+  @downloaders %{"latimes" => Slackword.Crossword.Downloaders.LatDownloader,
+                  "merv" => Slackword.Crossword.Downloaders.MervDownloader}
 
   alias Slackword.{ActiveCrossword, Database, Registry, Server}
 
@@ -22,7 +23,7 @@ defmodule Slackword.Response do
       [%Timex.DateTime{}=date, downloader] when is_atom(downloader) -> {date, downloader}
       [downloader, %Timex.DateTime{}=date] when is_atom(downloader) -> {date, downloader}
       # TODO(rohan): Return a nice error msg here
-      other -> 
+      other ->
         raise "Couldn't parse new command #{other}"
         {nil, nil}
     end
@@ -58,10 +59,10 @@ defmodule Slackword.Response do
     {:ok, crossword} = Server.get_crossword(server)
     case argument do
       "" -> render_crossword(crossword, params)
-      "errors" -> render_crossword(crossword, params, %{title: "Crossword ##{params[:crossword_id]} Errors"}, 
-                                   &ActiveCrossword.render_errors(&1, false, &2, &3), "errors") 
-      "solution" -> render_crossword(crossword, params, %{title: "Crossword ##{params[:crossword_id]} Solution"}, 
-                                   &ActiveCrossword.render_errors(&1, true, &2, &3), "solution") 
+      "errors" -> render_crossword(crossword, params, %{title: "Crossword ##{params[:crossword_id]} Errors"},
+                                   &ActiveCrossword.render_errors(&1, false, &2, &3), "errors")
+      "solution" -> render_crossword(crossword, params, %{title: "Crossword ##{params[:crossword_id]} Solution"},
+                                   &ActiveCrossword.render_errors(&1, true, &2, &3), "solution")
       other -> "I don't know how to show \"#{other}\". Try /cw help instead"
     end
   end
@@ -71,7 +72,7 @@ defmodule Slackword.Response do
     crossword_id = argument |> Integer.parse
     case crossword_id do
       :error -> "Couldn't parse the crossword id #{argument}"
-      {id, _} -> 
+      {id, _} ->
         Database.set_game_id(params[:channel_id], id)
         %{response_type: "in_channel", text: "Loaded crossword ##{id}"}
     end
@@ -80,7 +81,7 @@ defmodule Slackword.Response do
   def handle_command("info", params) do
     server = params[:server]
     {:ok, crossword} = Server.get_crossword(server)
-    metadata = crossword.crossword.metadata 
+    metadata = crossword.crossword.metadata
     info = "\n#{metadata.title}\nCreated by #{metadata.creator}\n#{metadata.description}"
     %{response_type: "in_channel", text: info}
   end
@@ -101,12 +102,12 @@ defmodule Slackword.Response do
     case Server.guess_word(server, clue_idx, guess) do
       {:error, :invalid_word} ->
         "That's not one of the clues in this crossword"
-      {:error, {:too_long, word_length, guess_length}} -> 
+      {:error, {:too_long, word_length, guess_length}} ->
       # TODO(rohan): Properly pluralize
         %{response_type: "in_channel", text: "\"#{guess}\" is #{guess_length - word_length} letters too long"}
-      {:error, {:too_short, word_length, guess_length}} -> 
+      {:error, {:too_short, word_length, guess_length}} ->
         %{response_type: "in_channel", text: "\"#{guess}\" is #{word_length - guess_length} letters too short"}
-      :ok -> 
+      :ok ->
         {:ok, crossword} = Server.get_crossword(server)
         render_crossword(crossword, params)
     end
@@ -125,13 +126,13 @@ defmodule Slackword.Response do
     end
     filename = png_filename(channel_id, crossword_id, crossword, filename_suffix)
     :egd.save(png, Path.join([@public_images_dir, filename]))
-    attachment = 
+    attachment =
       Dict.merge(%{image_url: image_url(params, filename),
         fallback: "Crossword #{crossword_id}",
         title: "Crossword ##{crossword_id}",
         title_link: image_url(params, filename),
         }, options)
-    %{response_type: "in_channel", 
+    %{response_type: "in_channel",
       attachments: [attachment]
      }
   end
